@@ -1,11 +1,35 @@
+/*
+ * 程序功能: 汽车租赁管理系统 - receipt implementation
+ * 作者: RayChen
+ * 日期: 2026-07-13
+ * 文件作用: 票据生成
+ */
+
 #include "receipt.h"
 #include "utils.h"
 
+/*
+ * 函数作用: 打印租车票据，显示租车编号、车辆信息、租车人、押金及日租金等详细信息
+ * 入参: rentId - 租车编号
+ *       vehicleId - 车辆编号
+ *       brand - 车辆品牌
+ *       plate - 车牌号码
+ *       type - 车辆类型
+ *       renterName - 租车人姓名
+ *       licenseNo - 驾照号码
+ *       rentDate - 租车日期
+ *       expectedReturnDate - 预计归还日期
+ *       deposit - 押金金额
+ *       dailyRate - 日租金
+ * 返回值: 无
+ * 异常提示: 无
+ */
 void Receipt::printRentReceipt(int rentId, int vehicleId, const char* brand,
                                 const char* plate, const char* type,
                                 const char* renterName, const char* licenseNo,
                                 const char* rentDate, const char* expectedReturnDate,
                                 double deposit, double dailyRate) {
+    // 票据打印: 租车票据
     char currentDate[32];
     getCurrentDate(currentDate);
 
@@ -31,11 +55,29 @@ void Receipt::printRentReceipt(int rentId, int vehicleId, const char* brand,
     printf("\n");
 }
 
+/*
+ * 函数作用: 打印退车费用收据，显示租车编号、车辆信息、租用天数、总费用及退还金额等结算明细
+ * 入参: rentId - 租车编号
+ *       vehicleId - 车辆编号
+ *       brand - 车辆品牌
+ *       plate - 车牌号码
+ *       renterName - 租车人姓名
+ *       rentDate - 租车日期
+ *       returnDate - 实际归还日期
+ *       days - 租用天数
+ *       dailyRate - 日租金
+ *       deposit - 押金金额
+ *       totalFee - 总费用
+ *       refund - 退还金额（押金 - 总费用）
+ * 返回值: 无
+ * 异常提示: 无
+ */
 void Receipt::printReturnReceipt(int rentId, int vehicleId, const char* brand,
                                   const char* plate, const char* renterName,
                                   const char* rentDate, const char* returnDate,
                                   int days, double dailyRate, double deposit,
                                   double totalFee, double refund) {
+    // 票据打印: 退车票据
     char currentDate[32];
     getCurrentDate(currentDate);
 

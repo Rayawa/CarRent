@@ -1,6 +1,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+/*
+ * 程序功能: 汽车租赁管理系统
+ * 作者: RayChen
+ * 日期: 2026-07-13
+ * 文件作用: 定义系统全局常量、枚举类型和公共头文件引用，为所有模块提供基础定义
+ */
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
