@@ -1,3 +1,5 @@
+//==========================菜单8：系统设置====================
+// 提供密码修改、报表导出、日志查看、数据清空等系统管理功能
 void menu8System() {
     while (true) {
         printf("\n1. 修改密码 2. 导出报表 3. 查看日志 4. 清空数据 0. 返回\n");
@@ -16,10 +18,12 @@ void menu8System() {
                 printf("已修改\n");
             }
             pauseScreen();
+        // 导出报表：生成带时间戳的文本报表文件
         } else if (c == 2) {
             exportReport();
             printf("已导出\n");
             pauseScreen();
+        // 查看日志：打开日志文件并逐行输出
         } else if (c == 3) {
             FILE* fp = fopen(FILE_LOG, "r");
             if (!fp) {
