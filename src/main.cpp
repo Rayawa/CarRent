@@ -3,7 +3,7 @@
  * 程序入口
  */
 
-#include "simple_app.cpp"
+#include "car_rent.cpp"
 
 int main() {
     runApp();

@@ -17,7 +17,7 @@ $(TARGET): $(OBJECTS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-src/main.o: src/simple_app.cpp src/menu1_vehicle.cpp src/menu2_renter.cpp src/menu3_rent.cpp src/menu4_return.cpp src/menu5_query.cpp src/menu6_statistics.cpp src/menu7_output.cpp src/menu8_system.cpp src/menu9_extended.cpp
+src/main.o: src/car_rent.cpp src/menu1_vehicle.cpp src/menu2_renter.cpp src/menu3_rent.cpp src/menu4_return.cpp src/menu5_query.cpp src/menu6_statistics.cpp src/menu7_output.cpp src/menu8_system.cpp src/menu9_extended.cpp
 
 run: $(TARGET)
 	./$(TARGET)
