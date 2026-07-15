@@ -7,23 +7,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(SOURCES
     src/main.cpp
-    src/vehicle.cpp
-    src/renter.cpp
-    src/rent_record.cpp
-    src/utils.cpp
-    src/auth.cpp
-    src/logger.cpp
-    src/vehicle_manager.cpp
-    src/renter_manager.cpp
-    src/rent_manager.cpp
-    src/receipt.cpp
-    src/statistics.cpp
-    src/ui.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+set_source_files_properties(src/main.cpp PROPERTIES OBJECT_DEPENDS "${CMAKE_SOURCE_DIR}/src/simple_app.cpp;${CMAKE_SOURCE_DIR}/src/menu1_vehicle.cpp;${CMAKE_SOURCE_DIR}/src/menu2_renter.cpp;${CMAKE_SOURCE_DIR}/src/menu3_rent.cpp;${CMAKE_SOURCE_DIR}/src/menu4_return.cpp;${CMAKE_SOURCE_DIR}/src/menu5_query.cpp;${CMAKE_SOURCE_DIR}/src/menu6_statistics.cpp;${CMAKE_SOURCE_DIR}/src/menu7_output.cpp;${CMAKE_SOURCE_DIR}/src/menu8_system.cpp;${CMAKE_SOURCE_DIR}/src/menu9_extended.cpp")
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4)

@@ -1,21 +1,9 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -I include
+CXXFLAGS = -std=c++11 -Wall -Wextra
 TARGET = CarRent
 BUILD_DIR = build
 
-SOURCES = src/main.cpp \
-          src/vehicle.cpp \
-          src/renter.cpp \
-          src/rent_record.cpp \
-          src/utils.cpp \
-          src/auth.cpp \
-          src/logger.cpp \
-          src/vehicle_manager.cpp \
-          src/renter_manager.cpp \
-          src/rent_manager.cpp \
-          src/receipt.cpp \
-          src/statistics.cpp \
-          src/ui.cpp
+SOURCES = src/main.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
@@ -28,6 +16,8 @@ $(TARGET): $(OBJECTS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+src/main.o: src/simple_app.cpp src/menu1_vehicle.cpp src/menu2_renter.cpp src/menu3_rent.cpp src/menu4_return.cpp src/menu5_query.cpp src/menu6_statistics.cpp src/menu7_output.cpp src/menu8_system.cpp src/menu9_extended.cpp
 
 run: $(TARGET)
 	./$(TARGET)
