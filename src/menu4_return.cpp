@@ -15,12 +15,14 @@ void menu4Return() {
             pauseScreen();
             continue;
         }
+        // 打印票据：输出该租车记录的简要信息
         if (c == 3) {
             printf("租车ID:%d 车辆:%d 用户:%d\n", r->id, r->vehicleId, r->renterId);
             printf("日期:%s -> %s\n", r->rentDate, r->expectedReturnDate);
             pauseScreen();
             continue;
         }
+        // 办理退车：输入实际归还日期，按租车天数×日租金计算总费用，退还押金差额
         char returnDate[MAX_DATE_LEN];
         inputLine("实际归还日期(YYYY-MM-DD): ", returnDate, MAX_DATE_LEN);
         double totalFee = 0;

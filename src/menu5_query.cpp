@@ -3,6 +3,7 @@ void menu5Query() {
         printf("\n1. 查车辆 2. 查用户 3. 查租车记录 0. 返回\n");
         int c = inputInt("请选择: ", 0, 3);
         if (c == 0) return;
+        // 查车辆：使用strstr在品牌和车牌字段中做子串模糊匹配
         if (c == 1) {
             char key[64];
             inputLine("输入品牌/车牌关键词: ", key, sizeof(key));
@@ -13,6 +14,7 @@ void menu5Query() {
                 }
             }
             pauseScreen();
+        // 查用户：使用strstr在姓名和驾照号字段中做子串模糊匹配
         } else if (c == 2) {
             char key[64];
             inputLine("输入姓名/驾照关键词: ", key, sizeof(key));
@@ -23,6 +25,7 @@ void menu5Query() {
                 }
             }
             pauseScreen();
+        // 查租车记录：将整数ID转为字符串后，在记录ID/车辆ID/用户ID中做子串模糊匹配
         } else if (c == 3) {
             char key[64];
             inputLine("输入租车ID/车辆ID/用户ID关键词: ", key, sizeof(key));

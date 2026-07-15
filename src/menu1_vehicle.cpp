@@ -8,6 +8,7 @@ void menu1Vehicle() {
             pauseScreen();
             continue;
         }
+        // 添加车辆：逐字段录入后追加到数组末尾
         if (c == 1) {
             Vehicle v;
             initVehicle(v);
@@ -22,11 +23,13 @@ void menu1Vehicle() {
             addVehicle(v);
             printf("已添加\n");
             pauseScreen();
+        // 删除车辆：先展示全部车辆，通过ID定位后从数组中移除（后续元素前移覆盖）
         } else if (c == 2) {
             printAllVehicles();
             int id = inputInt("输入车辆ID: ", 1, 9999);
             printf(deleteVehicle(id) ? "已删除\n" : "没找到\n");
             pauseScreen();
+        // 修改车辆：通过ID查找车辆，展示当前值后覆盖更新
         } else if (c == 3) {
             int id = inputInt("输入车辆ID: ", 1, 9999);
             Vehicle* p = findVehicle(id);

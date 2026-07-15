@@ -3,6 +3,7 @@ void menu8System() {
         printf("\n1. 修改密码 2. 导出报表 3. 查看日志 4. 清空数据 0. 返回\n");
         int c = inputInt("请选择: ", 0, 4);
         if (c == 0) return;
+        // 修改密码：验证旧密码后设置新密码，两次输入一致才生效
         if (c == 1) {
             char oldPwd[64], newPwd[64], confirmPwd[64];
             inputLine("旧密码: ", oldPwd, sizeof(oldPwd));
@@ -30,6 +31,7 @@ void menu8System() {
             while (fgets(line, sizeof(line), fp)) printf("%s", line);
             fclose(fp);
             pauseScreen();
+        // 清空数据：将所有计数器归零后保存，实现全部数据清除
         } else if (c == 4) {
             if (confirm("确认清空数据?")) {
                 vehicleCount = renterCount = rentCount = 0;

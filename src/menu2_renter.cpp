@@ -8,6 +8,7 @@ void menu2Renter() {
             pauseScreen();
             continue;
         }
+        // 添加用户：逐字段录入，性别统一大写后追加到数组末尾
         if (c == 1) {
             Renter r;
             initRenter(r);
@@ -23,11 +24,13 @@ void menu2Renter() {
             addRenter(r);
             printf("已添加\n");
             pauseScreen();
+        // 删除用户：先展示全部用户，通过ID定位后从数组中移除（后续元素前移覆盖）
         } else if (c == 2) {
             printAllRenters();
             int id = inputInt("输入用户ID: ", 1, 9999);
             printf(deleteRenter(id) ? "已删除\n" : "没找到\n");
             pauseScreen();
+        // 修改用户：通过ID查找用户，展示当前值后覆盖更新
         } else if (c == 3) {
             int id = inputInt("输入用户ID: ", 1, 9999);
             Renter* p = findRenter(id);
