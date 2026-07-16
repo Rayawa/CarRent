@@ -10,7 +10,7 @@ set(SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-set_source_files_properties(src/main.cpp PROPERTIES OBJECT_DEPENDS "${CMAKE_SOURCE_DIR}/src/car_rent.cpp;${CMAKE_SOURCE_DIR}/src/menu1_vehicle.cpp;${CMAKE_SOURCE_DIR}/src/menu2_renter.cpp;${CMAKE_SOURCE_DIR}/src/menu3_rent.cpp;${CMAKE_SOURCE_DIR}/src/menu4_return.cpp;${CMAKE_SOURCE_DIR}/src/menu5_query.cpp;${CMAKE_SOURCE_DIR}/src/menu6_statistics.cpp;${CMAKE_SOURCE_DIR}/src/menu7_output.cpp;${CMAKE_SOURCE_DIR}/src/menu8_system.cpp;${CMAKE_SOURCE_DIR}/src/menu9_extended.cpp")
+set_source_files_properties(src/main.cpp PROPERTIES OBJECT_DEPENDS "${CMAKE_SOURCE_DIR}/src/car_rent.cpp;${CMAKE_SOURCE_DIR}/src/menu1_vehicle.cpp;${CMAKE_SOURCE_DIR}/src/menu2_renter.cpp;${CMAKE_SOURCE_DIR}/src/menu3_rent.cpp;${CMAKE_SOURCE_DIR}/src/menu4_return.cpp;${CMAKE_SOURCE_DIR}/src/menu5_query.cpp;${CMAKE_SOURCE_DIR}/src/menu6_statistics.cpp;${CMAKE_SOURCE_DIR}/src/menu7_system.cpp")
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4)

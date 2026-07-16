@@ -804,22 +804,20 @@ void exportReport() {
     fclose(fp);
 }
 
+//==========================第十六部分：子模块引用====================
 void showAllInfo() {
     printf("\n===== 车辆 =====\n"); printAllVehicles();
     printf("\n===== 用户 =====\n"); printAllRenters();
     printf("\n===== 租车记录 =====\n"); printAllRents();
 }
 
-//==========================第十六部分：子模块引用====================
 #include "menu1_vehicle.cpp"
 #include "menu2_renter.cpp"
 #include "menu3_rent.cpp"
 #include "menu4_return.cpp"
 #include "menu5_query.cpp"
 #include "menu6_statistics.cpp"
-#include "menu7_output.cpp"
-#include "menu8_system.cpp"
-#include "menu9_extended.cpp"
+#include "menu7_system.cpp"
 
 //==========================第十七部分：界面与入口====================
 // 功能: 显示系统标题(含实时时钟), 入参: 无, 返回: 无
@@ -831,9 +829,9 @@ void showBanner() {
 
 // 功能: 主菜单(用户选择1-9进入子模块,0退出), 入参: 无, 返回: false退出/true继续
 bool mainMenu() {
-    printf("\n1.车辆管理 2.用户管理 3.租车办理 4.退车办理 5.信息查询\n");
-    printf("6.统计汇总 7.输出信息 8.系统设置 9.扩展功能 0.退出系统\n");
-    int choice = inputInt("请选择: ", 0, 9);
+    printf("\n1.车辆管理 2.用户管理 3.租车办理 4.退车办理\n");
+    printf("5.信息查询 6.统计汇总 7.系统设置 0.退出系统\n");
+    int choice = inputInt("请选择: ", 0, 7);
     switch (choice) {
         case 1: menu1Vehicle(); break;
         case 2: menu2Renter(); break;
@@ -841,9 +839,7 @@ bool mainMenu() {
         case 4: menu4Return(); break;
         case 5: menu5Query(); break;
         case 6: menu6Statistics(); break;
-        case 7: menu7Output(); break;
-        case 8: menu8System(); break;
-        case 9: menu9Extended(); break;
+        case 7: menu7System(); break;
         case 0: return false;
         default: break;
     }
