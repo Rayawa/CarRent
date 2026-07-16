@@ -12,8 +12,10 @@ void menu6Statistics() {
         if (c == 1) {
             // 系统概览：打印总数统计→车辆状态柱状图(可租/已租/维修)→品牌分布柱状图
             printStatistics();
+            // 可租车辆数a，已租车辆数r，维修车辆数m=vehicleCount-a-r
             int a = countAvailableVehicles(), r = countRentedVehicles(), m = vehicleCount - a - r;
             printf("\n车辆状态:\n");
+            // 标签数组：存储 "可租"、"已租"、"维修"，数值数组：存储对应的数量
             char sl[3][32]; int sv[3];
             strncpy(sl[0], "可租", 31); strncpy(sl[1], "已租", 31); strncpy(sl[2], "维修", 31);
             sv[0] = a; sv[1] = r; sv[2] = m;
@@ -52,15 +54,12 @@ void menu6Statistics() {
             pauseScreen();
         } else if (c == 4) {
             // 租车统计：按月统计(解析rentDate的月份字段，1-12月分组计数)
-            int vals[12]; countRentsByMonth(vals);   // 遍历rentHead→提取月份→对应槽位+1
+            int vals[12];
+            countRentsByMonth(vals);   // 遍历rentHead→提取月份→对应槽位+1
             char ml[12][32];
             for (int i = 0; i < 12; i++) snprintf(ml[i], 32, "%d月", i + 1);
             drawBarChart(ml, vals, 12);
             pauseScreen();
-        } else if (c == 5) {
-            // 输出全部信息：依次打印车辆/用户/租车记录三张表(每20行分页)
-            showAllInfo();
-            pauseScreen();
-        }
+        } else if (c == 5) { showAllInfo(); pauseScreen(); } // 直接打印
     }
 }

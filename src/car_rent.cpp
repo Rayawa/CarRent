@@ -1,7 +1,8 @@
 /*
  * 汽车租赁管理系统
- * 文件: car_rent.cpp  功能: 公共定义、链表结构、工具函数、数据持久化、业务逻辑、主菜单
- * 作者: 孙老师组     日期: 2026-07
+ * 文件: car_rent.cpp
+ * 功能: 公共定义、链表结构、工具函数、数据持久化、业务逻辑、主菜单
+ * 日期: 2026-07
  */
 
 #include <cstdio>
@@ -10,6 +11,7 @@
 #include <ctime>
 
 //==========================第一部分：常量与类型定义====================
+// 定义数量上下限
 constexpr int MAX_NAME_LEN = 32;
 constexpr int MAX_BRAND_LEN = 32;
 constexpr int MAX_TYPE_LEN = 32;
@@ -26,16 +28,15 @@ constexpr int MAX_RENTERS = 100;
 constexpr int MAX_RENTS = 300;
 constexpr int PASSWORD_MIN_LEN = 6;
 constexpr int PASSWORD_MAX_LEN = 16;
-constexpr int PAGE_SIZE = 20;
+// 文件保存位置
 constexpr char FILE_VEHICLE[] = "vehicle.dat";
 constexpr char FILE_RENTER[] = "renter.dat";
 constexpr char FILE_RENT[] = "rent.dat";
 constexpr char FILE_PASSWORD[] = "pwd.dat";
 constexpr char FILE_LOG[] = "log.txt";
-
-enum VehicleStatus { STATUS_AVAILABLE = 0, STATUS_RENTED = 1, STATUS_MAINTENANCE = 2 };
-enum RentStatus { RENT_ACTIVE = 0, RENT_RETURNED = 1 };
-
+enum VehicleStatus { STATUS_AVAILABLE = 0, STATUS_RENTED = 1, STATUS_MAINTENANCE = 2 }; // 车状态：可用0、租出去1、维修2
+enum RentStatus { RENT_ACTIVE = 0, RENT_RETURNED = 1 }; // 租状态： 租0回1
+// 三种类型结构体以及各自的数据都有哪些
 struct Vehicle {
     int id;
     char plateNo[MAX_PLATE_LEN];
@@ -66,27 +67,27 @@ struct RentRecord {
     char rentDate[MAX_DATE_LEN];
     char expectedReturnDate[MAX_DATE_LEN];
     char actualReturnDate[MAX_DATE_LEN];
-    double deposit;
-    double dailyRate;
-    double totalFee;
-    int status;
+    double deposit; // 押金
+    double dailyRate; // 每日租金
+    double totalFee; // 总费用
+    int status; // 订单状态
     char vehicleBrand[MAX_BRAND_LEN];
     char vehiclePlate[MAX_PLATE_LEN];
     char renterName[MAX_NAME_LEN];
     char renterLicense[MAX_LICENSE_LEN];
 };
-
-// 链表节点 — 单向链表，三套实体各自独立的头指针
+// 链表节点与头指针
 struct VehicleNode { Vehicle data; VehicleNode* next; };
 struct RenterNode   { Renter data;   RenterNode* next; };
 struct RentNode     { RentRecord data; RentNode* next; };
-
 VehicleNode* vehicleHead = nullptr;
 RenterNode*   renterHead = nullptr;
 RentNode*     rentHead = nullptr;
+// 计数器
 int vehicleCount = 0;
 int renterCount = 0;
 int rentCount = 0;
+// 密码初始化
 char passwordStore[64] = {0};
 char usernameStore[32] = {0};
 bool passwordReady = false;
@@ -94,27 +95,25 @@ bool passwordReady = false;
 //==========================第二部分：系统工具====================
 // 去除字符串末尾换行符
 void trimNewLine(char* s) {
-    if (!s) return;
-    size_t n = strlen(s);
-    if (n > 0 && s[n - 1] == '\n') s[n - 1] = '\0';
+    if (!s) return;                    // 1. 空指针检查
+    size_t n = strlen(s);              // 2. 获取字符串长度
+    if (n > 0 && s[n - 1] == '\n')     // 3. 检查最后一个字符是否是换行符
+        s[n - 1] = '\0';               // 4. 将换行符替换为字符串结束符
 }
-
-// 暂停等待用户按回车
+// 暂停屏幕
 void pauseScreen() {
-    printf("按回车继续...");
-    char buf[8];
-    fgets(buf, sizeof(buf), stdin);
+    printf("按回车继续...");          // 1. 显示提示信息
+    char buf[8];                     // 2. 创建输入缓冲区
+    fgets(buf, sizeof(buf), stdin);  // 3. 等待用户输入
 }
 
 //==========================第三部分：输入方法====================
 // 读取一行字符串
 void inputLine(const char* prompt, char* buf, int size) {
-    printf("%s", prompt);
-    fgets(buf, size, stdin);
-    trimNewLine(buf);
+    printf("%s", prompt);              // 1. 显示提示信息
+    fgets(buf, size, stdin);           // 2. 读取用户输入
+    trimNewLine(buf);                  // 3. 去掉换行符
 }
-
-// 读取整数(含范围校验+错误分类提示)
 int inputInt(const char* prompt, int minValue, int maxValue) {
     char line[64];
     while (true) {
@@ -129,8 +128,6 @@ int inputInt(const char* prompt, int minValue, int maxValue) {
         return static_cast<int>(v);
     }
 }
-
-// 读取浮点数(含范围校验)
 double inputDouble(const char* prompt, double minValue, double maxValue) {
     char line[64];
     while (true) {
@@ -145,8 +142,6 @@ double inputDouble(const char* prompt, double minValue, double maxValue) {
         return v;
     }
 }
-
-// 读取合法字符
 char inputChar(const char* prompt, const char* valid) {
     char line[64];
     while (true) {
@@ -159,8 +154,6 @@ char inputChar(const char* prompt, const char* valid) {
         printf("请输入有效字符[%s]\n", valid);
     }
 }
-
-// 用户确认(Y/N)
 bool confirm(const char* prompt) {
     char c = inputChar(prompt, "yYnN");
     return c == 'y' || c == 'Y';
@@ -173,8 +166,6 @@ void getNowDate(char* buf, int size) {
     tm* tmv = localtime(&t);
     snprintf(buf, size, "%04d-%02d-%02d", tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday);
 }
-
-// 获取当前日期时间(YYYY-MM-DD HH:MM:SS)
 void getNowDateTime(char* buf, int size) {
     time_t t = time(nullptr);
     tm* tmv = localtime(&t);
@@ -182,13 +173,9 @@ void getNowDateTime(char* buf, int size) {
              tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday,
              tmv->tm_hour, tmv->tm_min, tmv->tm_sec);
 }
-
-// 判断闰年
 int isLeapYear(int year) {
     return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
-
-// 功能: 校验日期格式合法性(含闰年识别、每月天数验证), 入参: date-日期字符串, 返回: true合法/false非法
 bool isValidDate(const char* date) {
     if (!date || strlen(date) != 10) return false;
     if (date[4] != '-' || date[7] != '-') return false;
@@ -204,8 +191,6 @@ bool isValidDate(const char* date) {
     if (isLeapYear(y)) days[1] = 29;
     return d <= days[m - 1];
 }
-
-// 功能: 日期转为从2000-01-01起的天数, 入参: date-日期字符串, 返回: 天数
 int dateToDays(const char* date) {
     int y = static_cast<int>(strtol(date, nullptr, 10));
     int m = static_cast<int>(strtol(date + 5, nullptr, 10));
@@ -217,8 +202,6 @@ int dateToDays(const char* date) {
     for (int i = 1; i < m; i++) days += mdays[i - 1];
     return days + d;
 }
-
-// 功能: 计算两天数差(绝对值), 入参: a/b-两个日期, 返回: 天数差
 int calcDateDiff(const char* a, const char* b) {
     int x = dateToDays(a), y = dateToDays(b);
     return x > y ? x - y : y - x;
@@ -234,7 +217,6 @@ void initRenter(Renter& r) { memset(&r, 0, sizeof(r)); r.gender = 'M'; }
 void initRent(RentRecord& r) { memset(&r, 0, sizeof(r)); r.status = RENT_ACTIVE; }
 
 //==========================第七部分：链表查找与ID分配====================
-// 功能: 按ID查找车辆(链表遍历), 入参: id-编号, 返回: 找到返回指针/否则nullptr
 Vehicle* findVehicle(int id) {
     VehicleNode* cur = vehicleHead;
     while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; }
@@ -250,8 +232,6 @@ RentRecord* findRent(int id) {
     while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; }
     return nullptr;
 }
-
-// 功能: 分配新ID(遍历链表取最大ID+1), 返回: 新ID
 int nextVehicleId() {
     int mx = 0;
     VehicleNode* cur = vehicleHead;
@@ -272,7 +252,6 @@ int nextRentId() {
 }
 
 //==========================第八部分：重复数据检查====================
-// 功能: 检查车牌号是否重复, 入参: plateNo-车牌号, 返回: true重复/false不重复
 bool isPlateNoDuplicate(const char* plateNo) {
     VehicleNode* cur = vehicleHead;
     while (cur) { if (strcmp(cur->data.plateNo, plateNo) == 0) return true; cur = cur->next; }
@@ -290,7 +269,7 @@ bool isIdCardDuplicate(const char* idCard) {
 }
 
 //==========================第九部分：数据持久化====================
-// 功能: 追加操作日志, 入参: action-操作描述, 返回: 无
+// 操作日志
 void logAction(const char* action) {
     FILE* fp = fopen(FILE_LOG, "a");
     if (!fp) return;
@@ -299,8 +278,7 @@ void logAction(const char* action) {
     fprintf(fp, "%s %s\n", buf, action);
     fclose(fp);
 }
-
-// 功能: 保存车辆链表到二进制文件(含进度条), 入参: 无, 返回: 无
+// 保存车辆链表
 void saveVehicles() {
     FILE* fp = fopen(FILE_VEHICLE, "wb");
     if (!fp) return;
@@ -332,8 +310,7 @@ void savePassword() {
     fwrite(passwordStore, sizeof(passwordStore), 1, fp);
     fclose(fp);
 }
-
-// 功能: 从二进制文件加载并构建链表(含合法性校验), 入参: 无, 返回: 无
+// 加载并构建链表
 void loadVehicles() {
     FILE* fp = fopen(FILE_VEHICLE, "rb");
     if (!fp) return;
@@ -397,7 +374,7 @@ void loadAllData() { loadVehicles(); loadRenters(); loadRents(); loadPassword();
 void saveAllData() { saveVehicles(); saveRenters(); saveRents(); savePassword(); }
 
 //==========================第十部分：密码与登录====================
-// 功能: XOR异或加密密码(与0x5A异或混淆), 入参: plain-明文 out-密文输出, 返回: 无
+// 密码相关
 void xorPassword(const char* plain, char* out) {
     int len = static_cast<int>(strlen(plain));
     for (int i = 0; i < 64; i++) out[i] = i < len ? static_cast<char>(plain[i] ^ 0x5A) : '\0';
@@ -415,8 +392,7 @@ bool setNewPassword(const char* plain) {
     savePassword();
     return true;
 }
-
-// 功能: 用户登录(用户名+密码双重验证,首次使用引导设置), 入参: 无, 返回: true成功/false失败
+// 用户登录
 bool login() {
     if (!passwordReady) {
         printf("首次使用，请设置登录信息\n");
@@ -446,8 +422,8 @@ bool login() {
     return false;
 }
 
-//==========================第十一部分：数据增删改(链表操作)====================
-// 功能: 添加车辆到链表末尾, 入参: v-车辆数据, 返回: true成功/false失败
+//==========================第十一部分：数据增删改====================
+// 车辆增删改
 bool addVehicle(const Vehicle& v) {
     if (vehicleCount >= MAX_VEHICLES) return false;
     VehicleNode* node = new VehicleNode;
@@ -462,7 +438,6 @@ bool addVehicle(const Vehicle& v) {
     logAction("添加车辆");
     return true;
 }
-// 功能: 从链表删除车辆(前驱节点重连+释放内存), 入参: id-编号, 返回: true成功/false未找到
 bool deleteVehicle(int id) {
     VehicleNode* prev = nullptr;
     VehicleNode* cur = vehicleHead;
@@ -487,7 +462,7 @@ bool modifyVehicle(int id, const Vehicle& v) {
     logAction("修改车辆");
     return true;
 }
-
+// 用户增删改
 bool addRenter(const Renter& r) {
     if (renterCount >= MAX_RENTERS) return false;
     RenterNode* node = new RenterNode;
@@ -526,8 +501,7 @@ bool modifyRenter(int id, const Renter& r) {
     logAction("修改用户");
     return true;
 }
-
-// 功能: 办理租车(校验车辆可租→创建记录→更新车辆状态→用户租次数+1), 入参: 见参数名, 返回: true成功/false失败
+// 租车退车
 bool addRentRecord(int vehicleId, int renterId, const char* rentDate, const char* expectDate) {
     if (rentCount >= MAX_RENTS) return false;
     Vehicle* v = findVehicle(vehicleId);
@@ -558,7 +532,6 @@ bool addRentRecord(int vehicleId, int renterId, const char* rentDate, const char
     logAction("办理租车");
     return true;
 }
-// 功能: 办理退车(天数×日租金=总费用,押金−总费用=退款), 入参: rentId/returnDate/totalFee(refund为输出), 返回: true成功
 bool returnRent(int rentId, const char* returnDate, double& totalFee, double& refund) {
     RentRecord* rec = findRent(rentId);
     if (!rec || rec->status == RENT_RETURNED) return false;
@@ -577,8 +550,8 @@ bool returnRent(int rentId, const char* returnDate, double& totalFee, double& re
     return true;
 }
 
-//==========================第十二部分：票据生成====================
-// 功能: 打印租车票据(表格化输出), 入参: r-租车记录, 返回: 无
+//==========================第十二部分：输出打印====================
+// 票据：格式化输出
 void printRentTicket(const RentRecord& r) {
     printf("\n========================================\n");
     printf("       汽车租赁公司租车票据\n");
@@ -592,7 +565,6 @@ void printRentTicket(const RentRecord& r) {
     printf(" 租车日期: %-10s  预计归还: %s\n", r.rentDate, r.expectedReturnDate);
     printf("========================================\n");
 }
-// 功能: 打印退车收据(表格化输出), 入参: r-租车记录 days-天数 total-总费用 refund-退款, 返回: 无
 void printReturnReceipt(const RentRecord& r, int days, double total, double refund) {
     printf("\n========================================\n");
     printf("     汽车租赁公司租车费用收据\n");
@@ -607,8 +579,7 @@ void printReturnReceipt(const RentRecord& r, int days, double total, double refu
     printf(" 实际退款: %.2f\n", refund);
     printf("========================================\n");
 }
-
-//==========================第十三部分：输出打印(链表遍历+分页)====================
+// 数据：格式化输出
 void printVehicleHeader() {
     printf("%-4s %-10s %-10s %-10s %-8s %-12s %-6s %-8s %-10s\n",
            "ID", "车牌", "品牌", "类型", "颜色", "购车日期", "状态", "日租金", "里程");
@@ -636,40 +607,34 @@ void printRentRow(const RentRecord& r) {
            r.actualReturnDate[0] ? r.actualReturnDate : "-",
            r.deposit, r.dailyRate, r.totalFee, rentStatusStr(r.status));
 }
-
-// 功能: 打印全部车辆(链表遍历,每PAGE_SIZE行分页), 入参: 无, 返回: 无
+// 打印全部：链表遍历
 void printAllVehicles() {
     printVehicleHeader();
-    int cnt = 0;
     VehicleNode* cur = vehicleHead;
     while (cur) {
         printVehicleRow(cur->data);
-        if (++cnt % PAGE_SIZE == 0 && cur->next) pauseScreen();
         cur = cur->next;
     }
 }
 void printAllRenters() {
     printRenterHeader();
-    int cnt = 0;
     RenterNode* cur = renterHead;
     while (cur) {
         printRenterRow(cur->data);
-        if (++cnt % PAGE_SIZE == 0 && cur->next) pauseScreen();
         cur = cur->next;
     }
 }
 void printAllRents() {
     printRentHeader();
-    int cnt = 0;
     RentNode* cur = rentHead;
     while (cur) {
         printRentRow(cur->data);
-        if (++cnt % PAGE_SIZE == 0 && cur->next) pauseScreen();
         cur = cur->next;
     }
 }
 
-//==========================第十四部分：统计与ASCII柱状图====================
+//==========================第十三部分：统计与ASCII柱状图====================
+// 计算数量：链表遍历与计数器
 int countAvailableVehicles() {
     int c = 0; VehicleNode* cur = vehicleHead;
     while (cur) { if (cur->data.status == STATUS_AVAILABLE) c++; cur = cur->next; }
@@ -685,13 +650,13 @@ int countActiveRents() {
     while (cur) { if (cur->data.status == RENT_ACTIVE) c++; cur = cur->next; }
     return c;
 }
+// *？？？？
 double totalRevenue() {
     double sum = 0; RentNode* cur = rentHead;
     while (cur) { if (cur->data.status == RENT_RETURNED) sum += cur->data.totalFee; cur = cur->next; }
     return sum;
 }
-
-// 功能: 按品牌/类型/颜色分组计数(去重后统计), 入参: labels-输出标签/values-输出计数/max-最大组数, 返回: 组数
+// *按品牌/类型/颜色分组计数
 int countVehiclesByBrand(char labels[][32], int values[], int max) {
     int n = 0;
     VehicleNode* cur = vehicleHead;
@@ -734,7 +699,7 @@ int countRentersByGender(int values[2]) {
     while (cur) { if (cur->data.gender == 'M') values[0]++; else values[1]++; cur = cur->next; }
     return 2;
 }
-// 功能: 统计用户按驾龄分段(0-3年/4-10年/10年以上)
+// *统计用户按驾龄分段
 void countRentersByDrivingYears(int values[3]) {
     values[0] = values[1] = values[2] = 0;
     RenterNode* cur = renterHead;
@@ -744,7 +709,7 @@ void countRentersByDrivingYears(int values[3]) {
         cur = cur->next;
     }
 }
-// 功能: 按月统计租车记录数
+// *按月统计租车记录数
 void countRentsByMonth(int values[12]) {
     for (int i = 0; i < 12; i++) values[i] = 0;
     RentNode* cur = rentHead;
@@ -754,8 +719,7 @@ void countRentsByMonth(int values[12]) {
         cur = cur->next;
     }
 }
-
-// 功能: 绘制ASCII柱状图, 入参: labels-标签 values-数值 n-数量, 返回: 无
+// *柱状图
 void drawBarChart(char labels[][32], int values[], int n) {
     int mx = 0;
     for (int i = 0; i < n; i++) if (values[i] > mx) mx = values[i];
@@ -766,13 +730,11 @@ void drawBarChart(char labels[][32], int values[], int n) {
         printf("\n");
     }
 }
-
 void printStatistics() {
     printf("车辆总数: %d  可租: %d  已租: %d\n", vehicleCount, countAvailableVehicles(), countRentedVehicles());
     printf("用户总数: %d  租车记录: %d  进行中: %d  总收入: %.2f\n", renterCount, rentCount, countActiveRents(), totalRevenue());
 }
-
-//==========================第十五部分：报表导出====================
+// *导出报表
 void exportReport() {
     char name[64];
     getNowDateTime(name, sizeof(name));
@@ -803,14 +765,14 @@ void exportReport() {
     }
     fclose(fp);
 }
-
-//==========================第十六部分：子模块引用====================
+// 显示全部信息：直接调用三个打印全部
 void showAllInfo() {
     printf("\n===== 车辆 =====\n"); printAllVehicles();
     printf("\n===== 用户 =====\n"); printAllRenters();
     printf("\n===== 租车记录 =====\n"); printAllRents();
 }
 
+//==========================第十四部分：子模块引用====================
 #include "menu1_vehicle.cpp"
 #include "menu2_renter.cpp"
 #include "menu3_rent.cpp"
@@ -819,15 +781,14 @@ void showAllInfo() {
 #include "menu6_statistics.cpp"
 #include "menu7_system.cpp"
 
-//==========================第十七部分：界面与入口====================
-// 功能: 显示系统标题(含实时时钟), 入参: 无, 返回: 无
+//==========================第十五部分：界面与入口====================
+// 获得时间信息并打印
 void showBanner() {
     char now[32];
     getNowDateTime(now, sizeof(now));
     printf("\n汽车租赁管理系统  %s\n", now);
 }
-
-// 功能: 主菜单(用户选择1-9进入子模块,0退出), 入参: 无, 返回: false退出/true继续
+// 主界面，打印选项之后switch
 bool mainMenu() {
     printf("\n1.车辆管理 2.用户管理 3.租车办理 4.退车办理\n");
     printf("5.信息查询 6.统计汇总 7.系统设置 0.退出系统\n");
@@ -845,12 +806,11 @@ bool mainMenu() {
     }
     return true;
 }
-
-// 功能: 程序启动入口(加载数据→登录→主循环→保存退出), 入参: 无, 返回: 无
+// 程序入口
 void runApp() {
-    loadAllData();
-    if (!login()) { printf("登录失败\n"); return; }
-    showBanner();
-    while (mainMenu()) {}
-    saveAllData();
+    loadAllData(); // 加载所有数据
+    if (!login()) { printf("登录失败\n"); return; } // 登陆判断
+    showBanner(); // 打印标题时间信息
+    while (mainMenu()) {} // 主程序
+    saveAllData(); // 退出之前报错所有数据
 }

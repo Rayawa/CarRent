@@ -10,39 +10,35 @@ void menu7System() {
         int c = inputInt("请选择: ", 0, 4);
         if (c == 0) return;
         if (c == 1) {
-            // 修改密码：验证旧密码(XOR解密比对)→新密码两次输入一致→XOR加密后覆写存储
-            char oldPwd[64], newPwd[64], confirmPwd[64];
+            char oldPwd[64], newPwd[64], confirmPwd[64]; // 定义三种密码并输入
             inputLine("旧密码: ", oldPwd, sizeof(oldPwd));
             inputLine("新密码: ", newPwd, sizeof(newPwd));
             inputLine("确认密码: ", confirmPwd, sizeof(confirmPwd));
-            if (strcmp(newPwd, confirmPwd) != 0 || !checkPassword(oldPwd)) {   // 新密码不一致或旧密码错误
-                printf("失败\n");
+            if (strcmp(newPwd, confirmPwd) != 0 || !checkPassword(oldPwd)) {
+                printf("失败\n"); // 新旧不一致 || 与旧密码不相同
             } else {
-                setNewPassword(newPwd);   // XOR加密→存入passwordStore→写pwd.dat
+                setNewPassword(newPwd); // 设置新密码
                 printf("已修改\n");
             }
             pauseScreen();
         } else if (c == 2) {
-            // 导出报表：遍历三个链表写文本文件(含时间戳文件名)
-            exportReport();
+            exportReport(); // 导出报表
             printf("已导出\n");
             pauseScreen();
         } else if (c == 3) {
-            // 查看日志：打开log.txt逐行读取输出
-            FILE* fp = fopen(FILE_LOG, "r");
-            if (!fp) { printf("暂无日志\n"); pauseScreen(); continue; }
+            FILE* fp = fopen(FILE_LOG, "r"); // 打开日志
+            if (!fp) { printf("暂无日志\n"); pauseScreen(); continue; } // 错误处理
             char line[256];
-            while (fgets(line, sizeof(line), fp)) printf("%s", line);   // 逐行输出，保留原格式
-            fclose(fp);
+            while (fgets(line, sizeof(line), fp)) printf("%s", line); // 逐行输出
+            fclose(fp); // 关闭文件
             pauseScreen();
         } else if (c == 4) {
-            // 清空数据：确认后→逐个释放三个链表所有节点→计数器归零→保存覆盖文件
-            if (confirm("确认清空数据?")) {
+            if (confirm("确认清空数据?")) { // 全部链表清空
                 while (vehicleHead) { VehicleNode* t = vehicleHead; vehicleHead = vehicleHead->next; delete t; }
                 while (renterHead)   { RenterNode*   t = renterHead;   renterHead = renterHead->next;   delete t; }
                 while (rentHead)     { RentNode*     t = rentHead;     rentHead = rentHead->next;       delete t; }
-                vehicleCount = renterCount = rentCount = 0;
-                saveAllData();   // 写空数据到三个.dat文件
+                vehicleCount = renterCount = rentCount = 0; // 三种数据数量清空
+                saveAllData();
                 printf("已清空\n");
             }
             pauseScreen();

@@ -9,14 +9,13 @@ void menu1Vehicle() {
         printf("\n1.添加车辆 2.删除车辆 3.修改车辆 4.显示所有 0.返回\n");
         int c = inputInt("请选择: ", 0, 4);
         if (c == 0) return;
-        if (c == 4) { printAllVehicles(); pauseScreen(); continue; }
+        if (c == 4) { printAllVehicles(); pauseScreen(); continue; } // 直接打印
         if (c == 1) {
-            // 添加车辆：初始化结构体→逐字段录入→车牌重复检查→创建链表节点追加到末尾→保存
             Vehicle v{};
             initVehicle(v);
             while (true) {
                 inputLine("车牌号: ", v.plateNo, MAX_PLATE_LEN);
-                if (!isPlateNoDuplicate(v.plateNo)) break;   // 遍历链表检查车牌是否已存在
+                if (!isPlateNoDuplicate(v.plateNo)) break;
                 printf("车牌号已存在，请重新输入\n");
             }
             inputLine("品牌: ", v.brand, MAX_BRAND_LEN);
@@ -26,20 +25,18 @@ void menu1Vehicle() {
             inputLine("保险信息: ", v.insurance, MAX_INSURANCE_LEN);
             v.dailyRate = inputDouble("日租金: ", 0.0, 999999.0);
             v.mileage = inputDouble("里程: ", 0.0, 9999999.0);
-            addVehicle(v);   // 分配ID→创建节点→链到末尾→计数+1→保存文件→写日志
+            addVehicle(v); // 输入v的所有信息（部分校验）并进入函数添加
             printf("已添加\n");
             pauseScreen();
         } else if (c == 2) {
-            // 删除车辆：展示全部→输入ID→在链表中找到该节点→前驱重连→释放内存
             printAllVehicles();
             int id = inputInt("输入车辆ID: ", 1, 9999);
-            printf(deleteVehicle(id) ? "已删除\n" : "没找到\n");
+            printf(deleteVehicle(id) ? "已删除\n" : "没找到\n"); // 删除对应的id，如果返回false说明没找到
             pauseScreen();
         } else if (c == 3) {
-            // 修改车辆：输入ID→findVehicle遍历链表定位→展示当前值→逐字段覆盖→保存
             int id = inputInt("输入车辆ID: ", 1, 9999);
             Vehicle* p = findVehicle(id);
-            if (!p) { printf("没找到\n"); pauseScreen(); continue; }
+            if (!p) { printf("没找到\n"); pauseScreen(); continue; } // 判断到底有没有这辆车
             Vehicle v = *p;
             inputLine("车牌号: ", v.plateNo, MAX_PLATE_LEN);
             inputLine("品牌: ", v.brand, MAX_BRAND_LEN);
@@ -49,7 +46,7 @@ void menu1Vehicle() {
             inputLine("保险信息: ", v.insurance, MAX_INSURANCE_LEN);
             v.dailyRate = inputDouble("日租金: ", 0.0, 999999.0);
             v.mileage = inputDouble("里程: ", 0.0, 9999999.0);
-            printf(modifyVehicle(id, v) ? "已修改\n" : "失败\n");
+            printf(modifyVehicle(id, v) ? "已修改\n" : "失败\n"); // 输入所有信息并替换v的所有信息（部分校验）并进入函数添加，如果返回false说明失败了
             pauseScreen();
         }
     }

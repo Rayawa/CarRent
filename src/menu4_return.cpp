@@ -9,28 +9,26 @@ void menu4Return() {
         printf("\n1.办理退车 2.显示租车记录 3.打印票据 0.返回\n");
         int c = inputInt("请选择: ", 0, 3);
         if (c == 0) return;
-        if (c == 2) { printAllRents(); pauseScreen(); continue; }
-        int rentId = inputInt("租车记录ID: ", 1, 9999);
-        RentRecord* r = findRent(rentId);   // 遍历rentHead链表按ID查找
-        if (!r) { printf("没找到\n"); pauseScreen(); continue; }
+        if (c == 2) { printAllRents(); pauseScreen(); continue; } // 直接打印
+        int rentId = inputInt("租车记录ID: ", 1, 9999); // 2与3均需要租车记录，提前输入存在rentId
+        RentRecord* r = findRent(rentId);
+        if (!r) { printf("没找到\n"); pauseScreen(); continue; } // 没有就没找到，提前判断
         if (c == 3) {
-            // 打印票据：输出租车记录摘要+格式化租车票据
             printf("租车ID:%d 车辆:%d 用户:%d\n", r->id, r->vehicleId, r->renterId);
             printf("日期:%s -> %s\n", r->rentDate, r->expectedReturnDate);
-            printRentTicket(*r);
+            printRentTicket(*r); // 格式化输出
             pauseScreen(); continue;
         }
-        // 办理退车：输入归还日期→计算天数差×日租金=总费用→押金−总费用=退款→打印收据
         char returnDate[MAX_DATE_LEN];
-        inputLine("实际归还日期(YYYY-MM-DD): ", returnDate, MAX_DATE_LEN);
+        inputLine("实际归还日期(YYYY-MM-DD): ", returnDate, MAX_DATE_LEN); // 输入归还日期
         double totalFee = 0, refund = 0;
-        if (!returnRent(rentId, returnDate, totalFee, refund)) {
+        if (!returnRent(rentId, returnDate, totalFee, refund)) { // 进入函数计算出结果，如果false则跳出
             printf("办理失败(已归还或不存在)\n"); pauseScreen(); continue;
         }
         RentRecord* rec = findRent(rentId);
-        int days = calcDateDiff(rec->rentDate, returnDate);   // 日期→天数换算(含闰年)
-        if (days < 1) days = 1;   // 最少按1天计算
-        printReturnReceipt(*rec, days, totalFee, refund);     // 格式化输出"汽车租赁公司租车费用收据"
+        int days = calcDateDiff(rec->rentDate, returnDate); // 计算天数
+        if (days < 1) days = 1; // 错误处理
+        printReturnReceipt(*rec, days, totalFee, refund); // 打印退车票据
         printf("已退车\n");
         pauseScreen();
     }
