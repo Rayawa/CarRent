@@ -1,20 +1,25 @@
+/*
+ * 汽车租赁管理系统
+ * 文件: menu1_vehicle.cpp  功能: 车辆信息管理子菜单
+ * 作者: 孙老师组     日期: 2026-07
+ */
 //==========================菜单1：车辆信息管理====================
-// 提供车辆的增删改查功能，支持添加、删除、修改、显示全部车辆
+// 提供车辆的增删改查功能(底层使用链表存储)
 void menu1Vehicle() {
     while (true) {
-        printf("\n1. 添加车辆 2. 删除车辆 3. 修改车辆 4. 显示所有 0. 返回\n");
+        printf("\n1.添加车辆 2.删除车辆 3.修改车辆 4.显示所有 0.返回\n");
         int c = inputInt("请选择: ", 0, 4);
         if (c == 0) return;
-        if (c == 4) {
-            printAllVehicles();
-            pauseScreen();
-            continue;
-        }
-        // 添加车辆：逐字段录入后追加到数组末尾
+        if (c == 4) { printAllVehicles(); pauseScreen(); continue; }
+        // 添加车辆：逐字段录入→重复检查→追加到链表末尾
         if (c == 1) {
             Vehicle v;
             initVehicle(v);
-            inputLine("车牌号: ", v.plateNo, MAX_PLATE_LEN);
+            while (true) {
+                inputLine("车牌号: ", v.plateNo, MAX_PLATE_LEN);
+                if (!isPlateNoDuplicate(v.plateNo)) break;
+                printf("车牌号已存在，请重新输入\n");
+            }
             inputLine("品牌: ", v.brand, MAX_BRAND_LEN);
             inputLine("类型: ", v.type, MAX_TYPE_LEN);
             inputLine("颜色: ", v.color, MAX_COLOR_LEN);
@@ -25,13 +30,13 @@ void menu1Vehicle() {
             addVehicle(v);
             printf("已添加\n");
             pauseScreen();
-        // 删除车辆：先展示全部车辆，通过ID定位后从数组中移除（后续元素前移覆盖）
+        // 删除车辆：展示全部→输入ID→从链表删除
         } else if (c == 2) {
             printAllVehicles();
             int id = inputInt("输入车辆ID: ", 1, 9999);
             printf(deleteVehicle(id) ? "已删除\n" : "没找到\n");
             pauseScreen();
-        // 修改车辆：通过ID查找车辆，展示当前值后覆盖更新
+        // 修改车辆：通过ID查找→展示当前值→覆盖更新
         } else if (c == 3) {
             int id = inputInt("输入车辆ID: ", 1, 9999);
             Vehicle* p = findVehicle(id);
