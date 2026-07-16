@@ -1,0 +1,4 @@
+If:
+  PathMatch: src/menu.*\.cpp
+CompileFlags:
+  Add: [-include, /Users/raychen/Develop/proj/CarRent/src/car_rent.cpp]

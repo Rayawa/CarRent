@@ -3,14 +3,11 @@
  * 文件: menu9_extended.cpp  功能: 扩展功能子菜单
  * 作者: 孙老师组     日期: 2026-07
  */
-//==========================菜单9：扩展功能====================
-// 跨实体模糊搜索/车辆状态汇总/ASCII柱状图展示
 void menu9Extended() {
     while (true) {
         printf("\n1.模糊搜索 2.车辆状态汇总 3.品牌分布图 0.返回\n");
         int c = inputInt("请选择: ", 0, 3);
         if (c == 0) return;
-        // 模糊搜索：strstr在车辆品牌/车牌和用户名/驾照号中跨实体匹配
         if (c == 1) {
             char key[64];
             inputLine("关键词: ", key, sizeof(key));
@@ -27,23 +24,18 @@ void menu9Extended() {
                 rc = rc->next;
             }
             pauseScreen();
-        // 车辆状态汇总：三种状态分别计数
         } else if (c == 2) {
             int a = countAvailableVehicles(), r = countRentedVehicles(), m = vehicleCount - a - r;
-            printf("\n可租: %d  已租: %d  维修: %d\n", a, r, m);
-            int total = vehicleCount > 0 ? vehicleCount : 1;
-            printf("可租 "); for (int i = 0; i < a * 30 / total; i++) printf("#"); printf(" %d\n", a);
-            printf("已租 "); for (int i = 0; i < r * 30 / total; i++) printf("#"); printf(" %d\n", r);
-            printf("维修 "); for (int i = 0; i < m * 30 / total; i++) printf("#"); printf(" %d\n", m);
+            char sl[3][32]; int sv[3];
+            strncpy(sl[0], "可租", 31); strncpy(sl[1], "已租", 31); strncpy(sl[2], "维修", 31);
+            sv[0] = a; sv[1] = r; sv[2] = m;
+            drawBarChart(sl, sv, 3);
             pauseScreen();
-        // 品牌分布图：按品牌分组绘制ASCII柱状图
         } else if (c == 3) {
             char labels[50][32]; int values[50];
             int n = countVehiclesByBrand(labels, values, 50);
             printf("\n车辆品牌分布:\n");
-            const char* labelPtrs[50];
-            for (int i = 0; i < n; i++) labelPtrs[i] = labels[i];
-            drawBarChart(labelPtrs, values, n);
+            drawBarChart(labels, values, n);
             pauseScreen();
         }
     }

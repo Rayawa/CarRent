@@ -92,39 +92,29 @@ char usernameStore[32] = {0};
 bool passwordReady = false;
 
 //==========================第二部分：系统工具====================
-// 功能: 去除字符串末尾换行符, 入参: s-字符串, 返回: 无
+// 去除字符串末尾换行符
 void trimNewLine(char* s) {
     if (!s) return;
     size_t n = strlen(s);
     if (n > 0 && s[n - 1] == '\n') s[n - 1] = '\0';
 }
 
-// 功能: 暂停等待用户按回车, 入参: 无, 返回: 无
+// 暂停等待用户按回车
 void pauseScreen() {
     printf("按回车继续...");
     char buf[8];
     fgets(buf, sizeof(buf), stdin);
 }
 
-// 功能: 显示简单进度条, 入参: msg-提示文字 cur/total-进度, 返回: 无
-void showProgressBar(const char* msg, int cur, int total) {
-    printf("\r%s [", msg);
-    int pct = total > 0 ? cur * 20 / total : 20;
-    for (int i = 0; i < 20; i++) printf(i < pct ? "#" : " ");
-    printf("]");
-    fflush(stdout);
-    if (cur >= total) printf("\n");
-}
-
 //==========================第三部分：输入方法====================
-// 功能: 读取一行字符串, 入参: prompt-提示 buf-缓冲区 size-容量, 返回: 无
+// 读取一行字符串
 void inputLine(const char* prompt, char* buf, int size) {
     printf("%s", prompt);
     fgets(buf, size, stdin);
     trimNewLine(buf);
 }
 
-// 功能: 读取整数(含范围校验,错误分类提示), 入参: prompt-提示 min/max-范围, 返回: 输入的整数
+// 读取整数(含范围校验+错误分类提示)
 int inputInt(const char* prompt, int minValue, int maxValue) {
     char line[64];
     while (true) {
@@ -140,7 +130,7 @@ int inputInt(const char* prompt, int minValue, int maxValue) {
     }
 }
 
-// 功能: 读取浮点数(含范围校验), 入参: prompt-提示 min/max-范围, 返回: 输入的浮点数
+// 读取浮点数(含范围校验)
 double inputDouble(const char* prompt, double minValue, double maxValue) {
     char line[64];
     while (true) {
@@ -156,7 +146,7 @@ double inputDouble(const char* prompt, double minValue, double maxValue) {
     }
 }
 
-// 功能: 读取合法字符, 入参: prompt-提示 valid-合法字符集, 返回: 输入的字符
+// 读取合法字符
 char inputChar(const char* prompt, const char* valid) {
     char line[64];
     while (true) {
@@ -170,21 +160,21 @@ char inputChar(const char* prompt, const char* valid) {
     }
 }
 
-// 功能: 用户确认(Y/N), 入参: prompt-提示文字, 返回: true确认/false取消
+// 用户确认(Y/N)
 bool confirm(const char* prompt) {
     char c = inputChar(prompt, "yYnN");
     return c == 'y' || c == 'Y';
 }
 
 //==========================第四部分：时间日期工具====================
-// 功能: 获取当前日期(YYYY-MM-DD), 入参: buf-缓冲区 size-容量, 返回: 无
+// 获取当前日期(YYYY-MM-DD)
 void getNowDate(char* buf, int size) {
     time_t t = time(nullptr);
     tm* tmv = localtime(&t);
     snprintf(buf, size, "%04d-%02d-%02d", tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday);
 }
 
-// 功能: 获取当前日期时间(YYYY-MM-DD HH:MM:SS), 入参: buf-缓冲区 size-容量, 返回: 无
+// 获取当前日期时间(YYYY-MM-DD HH:MM:SS)
 void getNowDateTime(char* buf, int size) {
     time_t t = time(nullptr);
     tm* tmv = localtime(&t);
@@ -193,7 +183,7 @@ void getNowDateTime(char* buf, int size) {
              tmv->tm_hour, tmv->tm_min, tmv->tm_sec);
 }
 
-// 功能: 判断闰年, 入参: year-年份, 返回: 1是闰年/0不是
+// 判断闰年
 int isLeapYear(int year) {
     return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
@@ -316,12 +306,7 @@ void saveVehicles() {
     if (!fp) return;
     fwrite(&vehicleCount, sizeof(int), 1, fp);
     VehicleNode* cur = vehicleHead;
-    int cnt = 0;
-    while (cur) {
-        fwrite(&cur->data, sizeof(Vehicle), 1, fp);
-        cnt++; showProgressBar("保存车辆", cnt, vehicleCount);
-        cur = cur->next;
-    }
+    while (cur) { fwrite(&cur->data, sizeof(Vehicle), 1, fp); cur = cur->next; }
     fclose(fp);
 }
 void saveRenters() {
@@ -329,12 +314,7 @@ void saveRenters() {
     if (!fp) return;
     fwrite(&renterCount, sizeof(int), 1, fp);
     RenterNode* cur = renterHead;
-    int cnt = 0;
-    while (cur) {
-        fwrite(&cur->data, sizeof(Renter), 1, fp);
-        cnt++; showProgressBar("保存用户", cnt, renterCount);
-        cur = cur->next;
-    }
+    while (cur) { fwrite(&cur->data, sizeof(Renter), 1, fp); cur = cur->next; }
     fclose(fp);
 }
 void saveRents() {
@@ -342,12 +322,7 @@ void saveRents() {
     if (!fp) return;
     fwrite(&rentCount, sizeof(int), 1, fp);
     RentNode* cur = rentHead;
-    int cnt = 0;
-    while (cur) {
-        fwrite(&cur->data, sizeof(RentRecord), 1, fp);
-        cnt++; showProgressBar("保存记录", cnt, rentCount);
-        cur = cur->next;
-    }
+    while (cur) { fwrite(&cur->data, sizeof(RentRecord), 1, fp); cur = cur->next; }
     fclose(fp);
 }
 void savePassword() {
@@ -781,7 +756,7 @@ void countRentsByMonth(int values[12]) {
 }
 
 // 功能: 绘制ASCII柱状图, 入参: labels-标签 values-数值 n-数量, 返回: 无
-void drawBarChart(const char* labels[], int values[], int n) {
+void drawBarChart(char labels[][32], int values[], int n) {
     int mx = 0;
     for (int i = 0; i < n; i++) if (values[i] > mx) mx = values[i];
     for (int i = 0; i < n; i++) {
