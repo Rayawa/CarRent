@@ -119,13 +119,13 @@ int inputInt(const char* prompt, int minValue, int maxValue) {
     while (true) {
         printf("%s", prompt);
         fgets(line, sizeof(line), stdin);
-        trimNewLine(line);
-        if (line[0] == '\0') { printf("输入不能为空\n"); continue; }
+        trimNewLine(line); // 删掉换行
+        if (line[0] == '\0') { printf("输入不能为空\n"); continue; } // 判断直接换行
         char* end;
-        long v = strtol(line, &end, 10);
+        long v = strtol(line, &end, 10); // 对比十进制情况下end指针指到了那里，如果是换行就对了
         if (*end != '\0') { printf("请输入有效的整数\n"); continue; }
-        if (v < minValue || v > maxValue) { printf("请输入%d到%d之间的整数\n", minValue, maxValue); continue; }
-        return static_cast<int>(v);
+        if (v < minValue || v > maxValue) { printf("请输入%d到%d之间的整数\n", minValue, maxValue); continue; } // 检查范围是否合法
+        return static_cast<int>(v); // long强制转换int
     }
 }
 double inputDouble(const char* prompt, double minValue, double maxValue) {
@@ -136,7 +136,7 @@ double inputDouble(const char* prompt, double minValue, double maxValue) {
         trimNewLine(line);
         if (line[0] == '\0') { printf("输入不能为空\n"); continue; }
         char* end;
-        double v = strtod(line, &end);
+        double v = strtod(line, &end); // 同理遍历到换行
         if (*end != '\0') { printf("请输入有效的数值\n"); continue; }
         if (v < minValue || v > maxValue) { printf("请输入%.2f到%.2f之间的数值\n", minValue, maxValue); continue; }
         return v;
@@ -148,63 +148,63 @@ char inputChar(const char* prompt, const char* valid) {
         printf("%s", prompt);
         fgets(line, sizeof(line), stdin);
         trimNewLine(line);
-        if (line[0] == '\0') continue;
+        if (line[0] == '\0') continue; // 直接换行则continue
         char c = line[0];
-        for (int i = 0; valid[i]; i++) { if (valid[i] == c) return c; }
+        for (int i = 0; valid[i]; i++) { if (valid[i] == c) return c; } // 判断是否合法字符
         printf("请输入有效字符[%s]\n", valid);
     }
 }
 bool confirm(const char* prompt) {
     char c = inputChar(prompt, "yYnN");
-    return c == 'y' || c == 'Y';
+    return c == 'y' || c == 'Y'; // 只有yYnN是合法字符
 }
 
 //==========================第四部分：时间日期工具====================
 // 获取当前日期(YYYY-MM-DD)
 void getNowDate(char* buf, int size) {
     time_t t = time(nullptr);
-    tm* tmv = localtime(&t);
-    snprintf(buf, size, "%04d-%02d-%02d", tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday);
+    tm* tmv = localtime(&t); // time结构体
+    snprintf(buf, size, "%04d-%02d-%02d", tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday); // 格式化输出
 }
 void getNowDateTime(char* buf, int size) {
     time_t t = time(nullptr);
     tm* tmv = localtime(&t);
     snprintf(buf, size, "%04d-%02d-%02d %02d:%02d:%02d",
-             tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday,
+             tmv->tm_year + 1900, tmv->tm_mon + 1, tmv->tm_mday, // 日期一样，月份+1，年份从1900开始
              tmv->tm_hour, tmv->tm_min, tmv->tm_sec);
 }
 int isLeapYear(int year) {
-    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0; // 判断润年
 }
 bool isValidDate(const char* date) {
-    if (!date || strlen(date) != 10) return false;
-    if (date[4] != '-' || date[7] != '-') return false;
+    if (!date || strlen(date) != 10) return false; // 判断长度对不对
+    if (date[4] != '-' || date[7] != '-') return false; // 判断5和8是否是-
     for (int i = 0; i < 10; i++) {
         if (i == 4 || i == 7) continue;
         if (date[i] < '0' || date[i] > '9') return false;
-    }
-    int y = static_cast<int>(strtol(date, nullptr, 10));
-    int m = static_cast<int>(strtol(date + 5, nullptr, 10));
-    int d = static_cast<int>(strtol(date + 8, nullptr, 10));
-    if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1) return false;
-    int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    if (isLeapYear(y)) days[1] = 29;
-    return d <= days[m - 1];
+    } // 跳过-到时候判断是否全是数字
+    int y = static_cast<int>(strtol(date, nullptr, 10)); // 年份，解析到-就停止
+    int m = static_cast<int>(strtol(date + 5, nullptr, 10)); // 月份+5位，解析到-就停止
+    int d = static_cast<int>(strtol(date + 8, nullptr, 10)); // 日+5位，解析到\0就停止
+    if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1) return false; // 判断是否在日期范围内
+    int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 判断月中有多少天
+    if (isLeapYear(y)) days[1] = 29; // 闰年2月29天
+    return d <= days[m - 1]; // 如果输入天数比当月要多就false，否则true
 }
 int dateToDays(const char* date) {
     int y = static_cast<int>(strtol(date, nullptr, 10));
     int m = static_cast<int>(strtol(date + 5, nullptr, 10));
     int d = static_cast<int>(strtol(date + 8, nullptr, 10));
     int days = 0;
-    for (int i = 2000; i < y; i++) days += isLeapYear(i) ? 366 : 365;
+    for (int i = 2000; i < y; i++) days += isLeapYear(i) ? 366 : 365; // 从2000年到输入日期有多少天
     int mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     if (isLeapYear(y)) mdays[1] = 29;
-    for (int i = 1; i < m; i++) days += mdays[i - 1];
-    return days + d;
+    for (int i = 1; i < m; i++) days += mdays[i - 1]; // 计算多余的月
+    return days + d; // 年+月
 }
 int calcDateDiff(const char* a, const char* b) {
     int x = dateToDays(a), y = dateToDays(b);
-    return x > y ? x - y : y - x;
+    return x > y ? x - y : y - x; // 计算两个日期的时间差，先转换为对2000年有多少天，然后相减返回绝对值
 }
 
 //==========================第五部分：状态文案映射====================
@@ -253,19 +253,19 @@ int nextRentId() {
 
 //==========================第八部分：重复数据检查====================
 bool isPlateNoDuplicate(const char* plateNo) {
-    VehicleNode* cur = vehicleHead;
+    VehicleNode* cur = vehicleHead; // 从头遍历
     while (cur) { if (strcmp(cur->data.plateNo, plateNo) == 0) return true; cur = cur->next; }
-    return false;
+    return false; // 找到匹配立刻返回true，否则跑完了就是没找到false
 }
 bool isLicenseNoDuplicate(const char* licenseNo) {
     RenterNode* cur = renterHead;
     while (cur) { if (strcmp(cur->data.licenseNo, licenseNo) == 0) return true; cur = cur->next; }
-    return false;
+    return false; // 同上
 }
 bool isIdCardDuplicate(const char* idCard) {
     RenterNode* cur = renterHead;
     while (cur) { if (strcmp(cur->data.idCard, idCard) == 0) return true; cur = cur->next; }
-    return false;
+    return false; // 同上
 }
 
 //==========================第九部分：数据持久化====================

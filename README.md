@@ -48,25 +48,25 @@ main.cpp
 
 ### car_rent.cpp 内部结构（17 个部分）
 
-| 部分 | 内容 |
-|------|------|
-| 第一部分 | 常量定义（`constexpr`）、枚举（`VehicleStatus` / `RentStatus`）、结构体（`Vehicle` / `Renter` / `RentRecord`）、链表节点、全局变量 |
-| 第二部分 | 系统工具：`trimNewLine()`、`pauseScreen()` |
-| 第三部分 | 输入方法：`inputLine()`、`inputInt()`（含错误分类提示）、`inputDouble()`、`inputChar()`、`confirm()` |
-| 第四部分 | 时间日期工具：`getNowDate()`、`getNowDateTime()`、`isLeapYear()`、`isValidDate()`、`dateToDays()`、`calcDateDiff()` |
-| 第五部分 | 状态文案映射：`vehicleStatusStr()`、`rentStatusStr()` |
-| 第六部分 | 结构体初始化：`initVehicle()`、`initRenter()`、`initRent()` |
-| 第七部分 | 链表查找与 ID 分配：`findVehicle()`、`findRenter()`、`findRent()`、`nextVehicleId()`、`nextRenterId()`、`nextRentId()` |
-| 第八部分 | 重复检查：`isPlateNoDuplicate()`、`isLicenseNoDuplicate()`、`isIdCardDuplicate()` |
-| 第九部分 | 数据持久化：`loadVehicles()`、`saveVehicles()`、`loadRenters()`、`saveRenters()`、`loadRents()`、`saveRents()`、`loadPassword()`、`savePassword()`、`loadAllData()`、`saveAllData()` |
-| 第十部分 | 密码与登录：`xorPassword()`、`checkPassword()`、`setNewPassword()`、`login()` |
-| 第十一部分 | 数据增删改（链表操作）：`addVehicle()`、`deleteVehicle()`、`modifyVehicle()`、`addRenter()`、`deleteRenter()`、`modifyRenter()`、`addRentRecord()`、`returnRent()` |
-| 第十二部分 | 票据生成：`printRentTicket()`（租车票据）、`printReturnReceipt()`（退车收据） |
-| 第十三部分 | 输出打印（含分页）：`printVehicleHeader/Row/All()`、`printRenterHeader/Row/All()`、`printRentHeader/Row/All()` |
-| 第十四部分 | 统计与 ASCII 柱状图：各类计数函数、分组统计函数、`drawBarChart()`、`printStatistics()` |
-| 第十五部分 | 报表导出：`exportReport()` |
-| 第十六部分 | `showAllInfo()` + 子模块 `#include` 引用 |
-| 第十七部分 | 界面入口：`showBanner()`（含实时时钟）、`mainMenu()`、`runApp()` |
+| 部分    | 内容                                                                                                                                                                    |
+|-------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 第一部分  | 常量定义（`constexpr`）、枚举（`VehicleStatus` / `RentStatus`）、结构体（`Vehicle` / `Renter` / `RentRecord`）、链表节点、全局变量                                                               |
+| 第二部分  | 系统工具：`trimNewLine()`、`pauseScreen()`                                                                                                                                  |
+| 第三部分  | 输入方法：`inputLine()`、`inputInt()`（含错误分类提示）、`inputDouble()`、`inputChar()`、`confirm()`                                                                                    |
+| 第四部分  | 时间日期工具：`getNowDate()`、`getNowDateTime()`、`isLeapYear()`、`isValidDate()`、`dateToDays()`、`calcDateDiff()`                                                               |
+| 第五部分  | 状态文案映射：`vehicleStatusStr()`、`rentStatusStr()`                                                                                                                         |
+| 第六部分  | 结构体初始化：`initVehicle()`、`initRenter()`、`initRent()`                                                                                                                    |
+| 第七部分  | 链表查找与 ID 分配：`findVehicle()`、`findRenter()`、`findRent()`、`nextVehicleId()`、`nextRenterId()`、`nextRentId()`                                                             |
+| 第八部分  | 重复检查：`isPlateNoDuplicate()`、`isLicenseNoDuplicate()`、`isIdCardDuplicate()`                                                                                            |
+| 第九部分  | 数据持久化：`loadVehicles()`、`saveVehicles()`、`loadRenters()`、`saveRenters()`、`loadRents()`、`saveRents()`、`loadPassword()`、`savePassword()`、`loadAllData()`、`saveAllData()` |
+| 第十部分  | 密码与登录：`xorPassword()`、`checkPassword()`、`setNewPassword()`、`login()`                                                                                                  |
+| 第十一部分 | 数据增删改（链表操作）：`addVehicle()`、`deleteVehicle()`、`modifyVehicle()`、`addRenter()`、`deleteRenter()`、`modifyRenter()`、`addRentRecord()`、`returnRent()`                       |
+| 第十二部分 | 票据生成：`printRentTicket()`（租车票据）、`printReturnReceipt()`（退车收据）                                                                                                           |
+| 第十三部分 | 输出打印（含分页）：`printVehicleHeader/Row/All()`、`printRenterHeader/Row/All()`、`printRentHeader/Row/All()`                                                                    |
+| 第十四部分 | 统计与 ASCII 柱状图：各类计数函数、分组统计函数、`drawBarChart()`、`printStatistics()`                                                                                                      |
+| 第十五部分 | 报表导出：`exportReport()`                                                                                                                                                 |
+| 第十六部分 | `showAllInfo()` + 子模块 `#include` 引用                                                                                                                                   |
+| 第十七部分 | 界面入口：`showBanner()`（含实时时钟）、`mainMenu()`、`runApp()`                                                                                                                    |
 
 ## 功能模块
 
@@ -121,77 +121,77 @@ main.cpp
 
 ### Vehicle
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `id` | int | 自动递增编号 |
-| `plateNo` | char[16] | 车牌号（唯一约束）|
-| `brand` | char[32] | 品牌 |
-| `type` | char[32] | 类型 |
-| `color` | char[16] | 颜色 |
-| `purchaseDate` | char[16] | 购买日期（YYYY-MM-DD）|
-| `status` | int | 0-可租, 1-已租, 2-维修 |
-| `dailyRate` | double | 日租金 |
-| `mileage` | double | 里程 |
-| `insurance` | char[64] | 保险信息 |
+| 字段             | 类型       | 说明               |
+|----------------|----------|------------------|
+| `id`           | int      | 自动递增编号           |
+| `plateNo`      | char[16] | 车牌号（唯一约束）        |
+| `brand`        | char[32] | 品牌               |
+| `type`         | char[32] | 类型               |
+| `color`        | char[16] | 颜色               |
+| `purchaseDate` | char[16] | 购买日期（YYYY-MM-DD） |
+| `status`       | int      | 0-可租, 1-已租, 2-维修 |
+| `dailyRate`    | double   | 日租金              |
+| `mileage`      | double   | 里程               |
+| `insurance`    | char[64] | 保险信息             |
 
 ### Renter
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `id` | int | 自动递增编号 |
-| `name` | char[32] | 姓名 |
-| `age` | int | 年龄 |
-| `gender` | char | 性别（M/F）|
-| `phone` | char[20] | 联系电话 |
-| `licenseNo` | char[20] | 驾照号码（唯一约束）|
-| `idCard` | char[20] | 身份证号（唯一约束）|
-| `drivingYears` | int | 驾龄 |
-| `rentCount` | int | 累计租车次数 |
+| 字段             | 类型       | 说明         |
+|----------------|----------|------------|
+| `id`           | int      | 自动递增编号     |
+| `name`         | char[32] | 姓名         |
+| `age`          | int      | 年龄         |
+| `gender`       | char     | 性别（M/F）    |
+| `phone`        | char[20] | 联系电话       |
+| `licenseNo`    | char[20] | 驾照号码（唯一约束） |
+| `idCard`       | char[20] | 身份证号（唯一约束） |
+| `drivingYears` | int      | 驾龄         |
+| `rentCount`    | int      | 累计租车次数     |
 
 ### RentRecord
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `id` | int | 自动递增编号 |
-| `vehicleId` | int | 关联车辆编号 |
-| `renterId` | int | 关联用户编号 |
-| `rentDate` | char[16] | 租车日期 |
-| `expectedReturnDate` | char[16] | 预计归还日期 |
-| `actualReturnDate` | char[16] | 实际归还日期 |
-| `deposit` | double | 押金（日租金 × 3）|
-| `dailyRate` | double | 快照日租金 |
-| `totalFee` | double | 实际总费用 |
-| `status` | int | 0-租用中, 1-已归还 |
-| `vehicleBrand` | char[32] | 快照车辆品牌 |
-| `vehiclePlate` | char[16] | 快照车牌号 |
-| `renterName` | char[32] | 快照用户姓名 |
-| `renterLicense` | char[20] | 快照驾照号 |
+| 字段                   | 类型       | 说明           |
+|----------------------|----------|--------------|
+| `id`                 | int      | 自动递增编号       |
+| `vehicleId`          | int      | 关联车辆编号       |
+| `renterId`           | int      | 关联用户编号       |
+| `rentDate`           | char[16] | 租车日期         |
+| `expectedReturnDate` | char[16] | 预计归还日期       |
+| `actualReturnDate`   | char[16] | 实际归还日期       |
+| `deposit`            | double   | 押金（日租金 × 3）  |
+| `dailyRate`          | double   | 快照日租金        |
+| `totalFee`           | double   | 实际总费用        |
+| `status`             | int      | 0-租用中, 1-已归还 |
+| `vehicleBrand`       | char[32] | 快照车辆品牌       |
+| `vehiclePlate`       | char[16] | 快照车牌号        |
+| `renterName`         | char[32] | 快照用户姓名       |
+| `renterLicense`      | char[20] | 快照驾照号        |
 
 ## 数据文件
 
-| 文件 | 格式 | 说明 |
-|------|------|------|
-| `vehicle.dat` | 二进制 | `[count:4B] [Vehicle×N]` |
-| `renter.dat` | 二进制 | `[count:4B] [Renter×N]` |
-| `rent.dat` | 二进制 | `[count:4B] [RentRecord×N]` |
-| `pwd.dat` | 二进制 | `[username:32B] [password_encrypted:64B]` |
-| `log.txt` | 文本追加 | `YYYY-MM-DD HH:MM:SS 操作描述` |
+| 文件            | 格式   | 说明                                        |
+|---------------|------|-------------------------------------------|
+| `vehicle.dat` | 二进制  | `[count:4B] [Vehicle×N]`                  |
+| `renter.dat`  | 二进制  | `[count:4B] [Renter×N]`                   |
+| `rent.dat`    | 二进制  | `[count:4B] [RentRecord×N]`               |
+| `pwd.dat`     | 二进制  | `[username:32B] [password_encrypted:64B]` |
+| `log.txt`     | 文本追加 | `YYYY-MM-DD HH:MM:SS 操作描述`                |
 
 密码使用 XOR 0x5A 逐字节加密后存储。
 
 ## 关键算法
 
-| 算法 | 函数 | 实现要点 |
-|------|------|----------|
-| 日期合法性校验 | `isValidDate()` | 长度=10、分隔符位置、数字校验、年/月/日范围、闰年 2 月 29 天 |
-| 日期转天数 | `dateToDays()` | 从 2000-01-01 起累计全年天数 + 当月之前月份天数 + 当日 |
-| 天数差 | `calcDateDiff()` | 两日期分别转天数后取绝对值 |
-| 链表 ID 分配 | `nextXxxId()` | 遍历链表取 `max(id) + 1` |
-| 链表添加 | `addXxx()` | `new` 节点 → 赋值 → 找到尾节点 → 链接 → `count++` → 保存 |
-| 链表删除 | `deleteXxx()` | 遍历 → 记录前驱 → 目标节点时 `prev->next = cur->next` → `delete cur` |
-| 分组统计 | `countXxxByY()` | 遍历链表 → `strcmp` 去重 → 对应槽位 `values[found]++` |
-| ASCII 柱状图 | `drawBarChart()` | 找最大值 → 各值 × 30 / max 决定 `#` 数量 |
-| 文件读写 | `saveXxx()` / `loadXxx()` | 先写 count，再逐节点 `fwrite`；读取时 `fread` + `new` 构建链表 |
+| 算法        | 函数                        | 实现要点                                                      |
+|-----------|---------------------------|-----------------------------------------------------------|
+| 日期合法性校验   | `isValidDate()`           | 长度=10、分隔符位置、数字校验、年/月/日范围、闰年 2 月 29 天                      |
+| 日期转天数     | `dateToDays()`            | 从 2000-01-01 起累计全年天数 + 当月之前月份天数 + 当日                      |
+| 天数差       | `calcDateDiff()`          | 两日期分别转天数后取绝对值                                             |
+| 链表 ID 分配  | `nextXxxId()`             | 遍历链表取 `max(id) + 1`                                       |
+| 链表添加      | `addXxx()`                | `new` 节点 → 赋值 → 找到尾节点 → 链接 → `count++` → 保存               |
+| 链表删除      | `deleteXxx()`             | 遍历 → 记录前驱 → 目标节点时 `prev->next = cur->next` → `delete cur` |
+| 分组统计      | `countXxxByY()`           | 遍历链表 → `strcmp` 去重 → 对应槽位 `values[found]++`               |
+| ASCII 柱状图 | `drawBarChart()`          | 找最大值 → 各值 × 30 / max 决定 `#` 数量                            |
+| 文件读写      | `saveXxx()` / `loadXxx()` | 先写 count，再逐节点 `fwrite`；读取时 `fread` + `new` 构建链表           |
 
 ## 代码特点
 

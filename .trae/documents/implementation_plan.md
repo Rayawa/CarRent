@@ -23,13 +23,13 @@
 car_rent.cpp 中每个函数前加一行注释：`// 功能: xxx, 入参: xxx, 返回: xxx`
 
 ### 1.3 命名修正
-| 旧名 | 新名 |
-|------|------|
-| isLeap | isLeapYear |
-| validDate | isValidDate |
-| diffDays | calcDateDiff |
-| trimNewline | trimNewLine |
-| nowDate | getNowDate |
+| 旧名          | 新名             |
+|-------------|----------------|
+| isLeap      | isLeapYear     |
+| validDate   | isValidDate    |
+| diffDays    | calcDateDiff   |
+| trimNewline | trimNewLine    |
+| nowDate     | getNowDate     |
 | nowDateTime | getNowDateTime |
 
 ---
@@ -95,7 +95,7 @@ countByMonth()      → 按月统计租车量
 
 ## Phase 6：链表（替换数组）
 
-策略：车辆/用户/租车记录 三模块全部改为链表。
+策略：车辆/用户/租车记录 三个模块全部使用链表。
 
 新增 `linked_list.h`（用 `#include` 引入，~100行）：
 ```cpp
@@ -141,13 +141,13 @@ struct Node { T data; Node* next; };
 
 ## 实施顺序
 
-| 顺序 | 阶段 | 预估新增行 |
-|------|------|-----------|
-| 1 | 代码规范 | ~160 |
-| 2 | 票据生成 | ~60 |
-| 3 | 用户名登录 | ~30 |
-| 4 | 分类查询 | ~100 |
-| 5 | 分组统计 | ~80 |
-| 6 | 链表 | ~350 |
-| 7 | 扩展功能 | ~100 |
-| **合计** | | **~880** |
+| 顺序     | 阶段    | 预估新增行    |
+|--------|-------|----------|
+| 1      | 代码规范  | ~160     |
+| 2      | 票据生成  | ~60      |
+| 3      | 用户名登录 | ~30      |
+| 4      | 分类查询  | ~100     |
+| 5      | 分组统计  | ~80      |
+| 6      | 链表    | ~350     |
+| 7      | 扩展功能  | ~100     |
+| **合计** |       | **~880** |
