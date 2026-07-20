@@ -212,43 +212,43 @@ const char* vehicleStatusStr(int s) { return s == STATUS_AVAILABLE ? "可租" : 
 const char* rentStatusStr(int s) { return s == RENT_ACTIVE ? "租用中" : "已归还"; }
 
 //==========================第六部分：结构体初始化====================
-void initVehicle(Vehicle& v) { memset(&v, 0, sizeof(v)); v.status = STATUS_AVAILABLE; }
-void initRenter(Renter& r) { memset(&r, 0, sizeof(r)); r.gender = 'M'; }
-void initRent(RentRecord& r) { memset(&r, 0, sizeof(r)); r.status = RENT_ACTIVE; }
+void initVehicle(Vehicle& v) { memset(&v, 0, sizeof(v)); v.status = STATUS_AVAILABLE; } // 全部归零
+void initRenter(Renter& r) { memset(&r, 0, sizeof(r)); r.gender = 'M'; } // 全部M
+void initRent(RentRecord& r) { memset(&r, 0, sizeof(r)); r.status = RENT_ACTIVE; } // 全部可租
 
 //==========================第七部分：链表查找与ID分配====================
 Vehicle* findVehicle(int id) {
-    VehicleNode* cur = vehicleHead;
-    while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; }
-    return nullptr;
+    VehicleNode* cur = vehicleHead; // 初始化为头指针
+    while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; } // 遍历到了就输出
+    return nullptr; // 遍历不到返回空指针
 }
 Renter* findRenter(int id) {
     RenterNode* cur = renterHead;
     while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; }
-    return nullptr;
+    return nullptr; // 同上
 }
 RentRecord* findRent(int id) {
     RentNode* cur = rentHead;
     while (cur) { if (cur->data.id == id) return &cur->data; cur = cur->next; }
-    return nullptr;
+    return nullptr; // 同上
 }
 int nextVehicleId() {
-    int mx = 0;
+    int mx = 0; // 定义ID
     VehicleNode* cur = vehicleHead;
-    while (cur) { if (cur->data.id > mx) mx = cur->data.id; cur = cur->next; }
-    return mx + 1;
+    while (cur) { if (cur->data.id > mx) mx = cur->data.id; cur = cur->next; } // 遍历所有ID找出最大
+    return mx + 1; // 新的就是最大ID的下一个
 }
 int nextRenterId() {
     int mx = 0;
     RenterNode* cur = renterHead;
     while (cur) { if (cur->data.id > mx) mx = cur->data.id; cur = cur->next; }
-    return mx + 1;
+    return mx + 1; // 同上
 }
 int nextRentId() {
     int mx = 0;
     RentNode* cur = rentHead;
     while (cur) { if (cur->data.id > mx) mx = cur->data.id; cur = cur->next; }
-    return mx + 1;
+    return mx + 1; // 同上
 }
 
 //==========================第八部分：重复数据检查====================
@@ -271,26 +271,26 @@ bool isIdCardDuplicate(const char* idCard) {
 //==========================第九部分：数据持久化====================
 // 操作日志
 void logAction(const char* action) {
-    FILE* fp = fopen(FILE_LOG, "a");
-    if (!fp) return;
+    FILE* fp = fopen(FILE_LOG, "a"); // 追加模式打开日志，往后写
+    if (!fp) return; // 没有就返回
     char buf[32];
-    getNowDateTime(buf, sizeof(buf));
-    fprintf(fp, "%s %s\n", buf, action);
-    fclose(fp);
+    getNowDateTime(buf, sizeof(buf)); // 计算时间
+    fprintf(fp, "%s %s\n", buf, action); // 时间和内容写入
+    fclose(fp); // 关闭
 }
 // 保存车辆链表
 void saveVehicles() {
-    FILE* fp = fopen(FILE_VEHICLE, "wb");
-    if (!fp) return;
-    fwrite(&vehicleCount, sizeof(int), 1, fp);
+    FILE* fp = fopen(FILE_VEHICLE, "wb"); // 二进制写入
+    if (!fp) return; // 如果没有返回
+    fwrite(&vehicleCount, sizeof(int), 1, fp); // 写入计数器
     VehicleNode* cur = vehicleHead;
-    while (cur) { fwrite(&cur->data, sizeof(Vehicle), 1, fp); cur = cur->next; }
-    fclose(fp);
+    while (cur) { fwrite(&cur->data, sizeof(Vehicle), 1, fp); cur = cur->next; } // 遍历写入所有
+    fclose(fp); // 关闭文件
 }
 void saveRenters() {
     FILE* fp = fopen(FILE_RENTER, "wb");
     if (!fp) return;
-    fwrite(&renterCount, sizeof(int), 1, fp);
+    fwrite(&renterCount, sizeof(int), 1, fp); // 同上
     RenterNode* cur = renterHead;
     while (cur) { fwrite(&cur->data, sizeof(Renter), 1, fp); cur = cur->next; }
     fclose(fp);
@@ -298,7 +298,7 @@ void saveRenters() {
 void saveRents() {
     FILE* fp = fopen(FILE_RENT, "wb");
     if (!fp) return;
-    fwrite(&rentCount, sizeof(int), 1, fp);
+    fwrite(&rentCount, sizeof(int), 1, fp); // 同上
     RentNode* cur = rentHead;
     while (cur) { fwrite(&cur->data, sizeof(RentRecord), 1, fp); cur = cur->next; }
     fclose(fp);
@@ -306,25 +306,25 @@ void saveRents() {
 void savePassword() {
     FILE* fp = fopen(FILE_PASSWORD, "wb");
     if (!fp) return;
-    fwrite(usernameStore, sizeof(usernameStore), 1, fp);
+    fwrite(usernameStore, sizeof(usernameStore), 1, fp); // 直接写入用户名密码
     fwrite(passwordStore, sizeof(passwordStore), 1, fp);
     fclose(fp);
 }
 // 加载并构建链表
 void loadVehicles() {
-    FILE* fp = fopen(FILE_VEHICLE, "rb");
-    if (!fp) return;
-    fread(&vehicleCount, sizeof(int), 1, fp);
-    if (vehicleCount < 0 || vehicleCount > MAX_VEHICLES) { vehicleCount = 0; fclose(fp); return; }
-    VehicleNode* tail = nullptr;
-    vehicleHead = nullptr;
+    FILE* fp = fopen(FILE_VEHICLE, "rb"); // 二进制读取
+    if (!fp) return; // 不存在就关闭
+    fread(&vehicleCount, sizeof(int), 1, fp); // 读取计数器
+    if (vehicleCount < 0 || vehicleCount > MAX_VEHICLES) { vehicleCount = 0; fclose(fp); return; } // 合法校验int
+    VehicleNode* tail = nullptr; // 定义尾部指针
+    vehicleHead = nullptr; // 定义头指针为空指针
     for (int i = 0; i < vehicleCount; i++) {
-        VehicleNode* node = new VehicleNode;
-        fread(&node->data, sizeof(Vehicle), 1, fp);
-        node->next = nullptr;
-        if (!vehicleHead) vehicleHead = node;
-        else tail->next = node;
-        tail = node;
+        VehicleNode* node = new VehicleNode; // 新建一个节点
+        fread(&node->data, sizeof(Vehicle), 1, fp); // 读取当前的车辆data存入node
+        node->next = nullptr; // 新节点置空
+        if (!vehicleHead) vehicleHead = node; // 第一次循环设置头，防止空指针
+        else tail->next = node; // 指向下一个循环作为新的node，链接末尾
+        tail = node; // 尾部标记也下一个
     }
     fclose(fp);
 }
@@ -343,7 +343,7 @@ void loadRenters() {
         else tail->next = node;
         tail = node;
     }
-    fclose(fp);
+    fclose(fp); // 同上
 }
 void loadRents() {
     FILE* fp = fopen(FILE_RENT, "rb");
@@ -360,64 +360,64 @@ void loadRents() {
         else tail->next = node;
         tail = node;
     }
-    fclose(fp);
+    fclose(fp); // 同上
 }
 void loadPassword() {
     FILE* fp = fopen(FILE_PASSWORD, "rb");
     if (!fp) return;
-    fread(usernameStore, sizeof(usernameStore), 1, fp);
+    fread(usernameStore, sizeof(usernameStore), 1, fp); // 读取用户名密码
     fread(passwordStore, sizeof(passwordStore), 1, fp);
     fclose(fp);
-    passwordReady = passwordStore[0] != '\0';
+    passwordReady = passwordStore[0] != '\0'; // 判断是否首次进入（密码是否准备好）
 }
-void loadAllData() { loadVehicles(); loadRenters(); loadRents(); loadPassword(); }
-void saveAllData() { saveVehicles(); saveRenters(); saveRents(); savePassword(); }
+void loadAllData() { loadVehicles(); loadRenters(); loadRents(); loadPassword(); } // 加载全部
+void saveAllData() { saveVehicles(); saveRenters(); saveRents(); savePassword(); } // 保存全部
 
 //==========================第十部分：密码与登录====================
 // 密码相关
 void xorPassword(const char* plain, char* out) {
-    int len = static_cast<int>(strlen(plain));
-    for (int i = 0; i < 64; i++) out[i] = i < len ? static_cast<char>(plain[i] ^ 0x5A) : '\0';
+    int len = static_cast<int>(strlen(plain)); // 计算长度
+    for (int i = 0; i < 64; i++) out[i] = i < len ? static_cast<char>(plain[i] ^ 0x5A) : '\0'; // 输出的每一个字符，前面和Z异或，后全补\0
 }
 bool checkPassword(const char* plain) {
     char enc[64];
-    xorPassword(plain, enc);
-    return memcmp(enc, passwordStore, sizeof(passwordStore)) == 0;
+    xorPassword(plain, enc); // 输入进入加密
+    return memcmp(enc, passwordStore, sizeof(passwordStore)) == 0; // 对比64字节是否相同
 }
 bool setNewPassword(const char* plain) {
-    int len = static_cast<int>(strlen(plain));
-    if (len < PASSWORD_MIN_LEN || len > PASSWORD_MAX_LEN) return false;
-    xorPassword(plain, passwordStore);
-    passwordReady = true;
-    savePassword();
+    int len = static_cast<int>(strlen(plain)); // 计算长度
+    if (len < PASSWORD_MIN_LEN || len > PASSWORD_MAX_LEN) return false; // 检查长度是否合法
+    xorPassword(plain, passwordStore); // 输入加密
+    passwordReady = true; // 设为有密码，非首次登陆
+    savePassword(); // 数据持久化
     return true;
 }
 // 用户登录
 bool login() {
     if (!passwordReady) {
         printf("首次使用，请设置登录信息\n");
-        inputLine("设置用户名: ", usernameStore, sizeof(usernameStore));
+        inputLine("设置用户名: ", usernameStore, sizeof(usernameStore)); // 输入用户名直接保存
         char p1[64], p2[64];
         while (true) {
             inputLine("设置密码: ", p1, sizeof(p1));
             inputLine("确认密码: ", p2, sizeof(p2));
-            if (strcmp(p1, p2) == 0 && setNewPassword(p1)) break;
+            if (strcmp(p1, p2) == 0 && setNewPassword(p1)) break; // 两次密码一样符合要求就退出
             printf("密码不符合要求或不一致\n");
         }
-        savePassword();
+        savePassword(); // 保存
         logAction("首次设置用户名密码");
-        return true;
+        return true; // 直接返回了进入主程序
     }
     for (int i = 0; i < 3; i++) {
         char u[64], p[64];
         inputLine("用户名: ", u, sizeof(u));
-        inputLine("密码: ", p, sizeof(p));
+        inputLine("密码: ", p, sizeof(p)); // 输入用户名密码
         if (strcmp(u, usernameStore) == 0 && checkPassword(p)) {
-            logAction("登录成功");
+            logAction("登录成功"); // 比对并返回结果
             return true;
         }
         printf("用户名或密码错误\n");
-        logAction("登录失败");
+        logAction("登录失败"); // 三次以后失败
     }
     return false;
 }
@@ -425,16 +425,16 @@ bool login() {
 //==========================第十一部分：数据增删改====================
 // 车辆增删改
 bool addVehicle(const Vehicle& v) {
-    if (vehicleCount >= MAX_VEHICLES) return false;
-    VehicleNode* node = new VehicleNode;
-    node->data = v;
-    node->data.id = nextVehicleId();
-    node->data.status = STATUS_AVAILABLE;
-    node->next = nullptr;
-    if (!vehicleHead) { vehicleHead = node; }
-    else { VehicleNode* cur = vehicleHead; while (cur->next) cur = cur->next; cur->next = node; }
-    vehicleCount++;
-    saveVehicles();
+    if (vehicleCount >= MAX_VEHICLES) return false; // 超出最大值不给写入
+    VehicleNode* node = new VehicleNode; // 新建节点
+    node->data = v; // 存入整个车
+    node->data.id = nextVehicleId(); // 为车辆分配下一个id
+    node->data.status = STATUS_AVAILABLE; // 设为可用
+    node->next = nullptr; // 清空next防止野指针
+    if (!vehicleHead) { vehicleHead = node; } // 如果是头是空指针，node作为头
+    else { VehicleNode* cur = vehicleHead; while (cur->next) cur = cur->next; cur->next = node; } // 遍历找出最后，next就是插入的node
+    vehicleCount++; // 车辆数增加
+    saveVehicles(); // 数据持久化
     logAction("添加车辆");
     return true;
 }
@@ -443,22 +443,23 @@ bool deleteVehicle(int id) {
     VehicleNode* cur = vehicleHead;
     while (cur) {
         if (cur->data.id == id) {
-            if (prev) prev->next = cur->next; else vehicleHead = cur->next;
-            delete cur;
-            vehicleCount--;
-            saveVehicles();
+            if (prev) prev->next = cur->next; else vehicleHead = cur->next; // 找到id之后前面有数据就跳过去，没有就下一个
+            //prev的下一个就是cur的下一个，跳过cur，删除cur
+            delete cur; // 如果id是指定id就删除
+            vehicleCount--; // 车辆数减少
+            saveVehicles(); // 数据持久化
             logAction("删除车辆");
             return true;
         }
-        prev = cur; cur = cur->next;
+        prev = cur; cur = cur->next; // 下一个继续遍历
     }
     return false;
 }
 bool modifyVehicle(int id, const Vehicle& v) {
-    Vehicle* p = findVehicle(id);
-    if (!p) return false;
-    Vehicle tmp = v; tmp.id = id; *p = tmp;
-    saveVehicles();
+    Vehicle* p = findVehicle(id); // 遍历查找对应id
+    if (!p) return false; // 没找到返回false
+    Vehicle tmp = v; tmp.id = id; *p = tmp; // 保持车辆id不变的情况下修改数据
+    saveVehicles(); // 数据持久化
     logAction("修改车辆");
     return true;
 }
@@ -471,7 +472,7 @@ bool addRenter(const Renter& r) {
     node->data.rentCount = 0;
     node->next = nullptr;
     if (!renterHead) { renterHead = node; }
-    else { RenterNode* cur = renterHead; while (cur->next) cur = cur->next; cur->next = node; }
+    else { RenterNode* cur = renterHead; while (cur->next) cur = cur->next; cur->next = node; } // 同理
     renterCount++;
     saveRenters();
     logAction("添加用户");
@@ -482,7 +483,7 @@ bool deleteRenter(int id) {
     RenterNode* cur = renterHead;
     while (cur) {
         if (cur->data.id == id) {
-            if (prev) prev->next = cur->next; else renterHead = cur->next;
+            if (prev) prev->next = cur->next; else renterHead = cur->next; // 同理
             delete cur;
             renterCount--;
             saveRenters();
@@ -496,56 +497,56 @@ bool deleteRenter(int id) {
 bool modifyRenter(int id, const Renter& r) {
     Renter* p = findRenter(id);
     if (!p) return false;
-    Renter tmp = r; tmp.id = id; *p = tmp;
+    Renter tmp = r; tmp.id = id; *p = tmp; // 同理
     saveRenters();
     logAction("修改用户");
     return true;
 }
 // 租车退车
 bool addRentRecord(int vehicleId, int renterId, const char* rentDate, const char* expectDate) {
-    if (rentCount >= MAX_RENTS) return false;
-    Vehicle* v = findVehicle(vehicleId);
-    Renter* r = findRenter(renterId);
-    if (!v || !r || v->status != STATUS_AVAILABLE) return false;
-    RentRecord rec = {};
+    if (rentCount >= MAX_RENTS) return false; // 租车记录是否满了
+    Vehicle* v = findVehicle(vehicleId); // 遍历车
+    Renter* r = findRenter(renterId); // 遍历人
+    if (!v || !r || v->status != STATUS_AVAILABLE) return false; // 车辆用户都要存在并且车要可以租
+    RentRecord rec = {}; //初始化租车记录
     initRent(rec);
-    rec.id = nextRentId();
-    rec.vehicleId = vehicleId;
+    rec.id = nextRentId(); // id遍历下一个
+    rec.vehicleId = vehicleId; // 记录车辆与用户id
     rec.renterId = renterId;
-    strncpy(rec.rentDate, rentDate, MAX_DATE_LEN - 1);
+    strncpy(rec.rentDate, rentDate, MAX_DATE_LEN - 1); // 复制日期字符串
     strncpy(rec.expectedReturnDate, expectDate, MAX_DATE_LEN - 1);
-    rec.deposit = v->dailyRate * 3;
-    rec.dailyRate = v->dailyRate;
-    strncpy(rec.vehicleBrand, v->brand, MAX_BRAND_LEN - 1);
+    rec.deposit = v->dailyRate * 3; // 押金=日租金*3
+    rec.dailyRate = v->dailyRate; // 当前日租金保存快照
+    strncpy(rec.vehicleBrand, v->brand, MAX_BRAND_LEN - 1); // 车辆数据复制到记录
     strncpy(rec.vehiclePlate, v->plateNo, MAX_PLATE_LEN - 1);
     strncpy(rec.renterName, r->name, MAX_NAME_LEN - 1);
     strncpy(rec.renterLicense, r->licenseNo, MAX_LICENSE_LEN - 1);
     RentNode* node = new RentNode;
     node->data = rec;
     node->next = nullptr;
-    if (!rentHead) { rentHead = node; }
-    else { RentNode* cur = rentHead; while (cur->next) cur = cur->next; cur->next = node; }
-    rentCount++;
-    v->status = STATUS_RENTED;
-    r->rentCount++;
-    saveAllData();
+    if (!rentHead) { rentHead = node; } // 如果是空的那就作为头
+    else { RentNode* cur = rentHead; while (cur->next) cur = cur->next; cur->next = node; } // 不是的话遍历cur到下一个是不是空（找末尾）插入node
+    rentCount++; // 增加一次记录
+    v->status = STATUS_RENTED; // 标记为租出去了
+    r->rentCount++; // 用户租车记录增加一次
+    saveAllData(); // 数据持久化
     logAction("办理租车");
     return true;
 }
 bool returnRent(int rentId, const char* returnDate, double& totalFee, double& refund) {
-    RentRecord* rec = findRent(rentId);
-    if (!rec || rec->status == RENT_RETURNED) return false;
-    int days = calcDateDiff(rec->rentDate, returnDate);
-    if (days < 1) days = 1;
-    totalFee = days * rec->dailyRate;
-    refund = rec->deposit - totalFee;
-    if (refund < 0) refund = 0;
+    RentRecord* rec = findRent(rentId); // 找到之前的rent
+    if (!rec || rec->status == RENT_RETURNED) return false; // 不能重读退车
+    int days = calcDateDiff(rec->rentDate, returnDate); // 计算日期
+    if (days < 1) days = 1; // 不足一天强制1
+    totalFee = days * rec->dailyRate; // 总金额=天数*租金（从快照取）
+    refund = rec->deposit - totalFee; // 退款=押金-费用
+    if (refund < 0) refund = 0; // 退款负数就没有了
     strncpy(rec->actualReturnDate, returnDate, MAX_DATE_LEN - 1);
-    rec->totalFee = totalFee;
-    rec->status = RENT_RETURNED;
-    Vehicle* v = findVehicle(rec->vehicleId);
-    if (v) v->status = STATUS_AVAILABLE;
-    saveAllData();
+    rec->totalFee = totalFee; // 保存费用到记录
+    rec->status = RENT_RETURNED; // 标记退车
+    Vehicle* v = findVehicle(rec->vehicleId); // 找到这辆车
+    if (v) v->status = STATUS_AVAILABLE; // 设置为可租
+    saveAllData(); // 数据持久化
     logAction("办理退车");
     return true;
 }
@@ -637,24 +638,24 @@ void printAllRents() {
 // 计算数量：链表遍历与计数器
 int countAvailableVehicles() {
     int c = 0; VehicleNode* cur = vehicleHead;
-    while (cur) { if (cur->data.status == STATUS_AVAILABLE) c++; cur = cur->next; }
+    while (cur) { if (cur->data.status == STATUS_AVAILABLE) c++; cur = cur->next; } // 遍历所有符合可租的c++
     return c;
 }
 int countRentedVehicles() {
     int c = 0; VehicleNode* cur = vehicleHead;
-    while (cur) { if (cur->data.status == STATUS_RENTED) c++; cur = cur->next; }
+    while (cur) { if (cur->data.status == STATUS_RENTED) c++; cur = cur->next; } // 同上
     return c;
 }
 int countActiveRents() {
     int c = 0; RentNode* cur = rentHead;
-    while (cur) { if (cur->data.status == RENT_ACTIVE) c++; cur = cur->next; }
+    while (cur) { if (cur->data.status == RENT_ACTIVE) c++; cur = cur->next; } // 同上
     return c;
 }
-// *？？？？
+// 计算总钱
 double totalRevenue() {
     double sum = 0; RentNode* cur = rentHead;
     while (cur) { if (cur->data.status == RENT_RETURNED) sum += cur->data.totalFee; cur = cur->next; }
-    return sum;
+    return sum; // 遍历已经退车之后的费用总和
 }
 // *按品牌/类型/颜色分组计数
 int countVehiclesByBrand(char labels[][32], int values[], int max) {
