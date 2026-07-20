@@ -24,6 +24,7 @@ void menu1Vehicle() {
             inputLine("购买日期(YYYY-MM-DD): ", v.purchaseDate, MAX_DATE_LEN);
             inputLine("保险信息: ", v.insurance, MAX_INSURANCE_LEN);
             v.dailyRate = inputDouble("日租金: ", 0.0, 999999.0);
+            v.deposit = inputDouble("押金: ", 0.0, 99999999.0);
             v.mileage = inputDouble("里程: ", 0.0, 9999999.0);
             addVehicle(v); // 输入v的所有信息（部分校验）并进入函数添加
             printf("已添加\n");
@@ -45,6 +46,7 @@ void menu1Vehicle() {
             inputLine("购买日期: ", v.purchaseDate, MAX_DATE_LEN);
             inputLine("保险信息: ", v.insurance, MAX_INSURANCE_LEN);
             v.dailyRate = inputDouble("日租金: ", 0.0, 999999.0);
+            v.deposit = inputDouble("押金: ", 0.0, 99999999.0);
             v.mileage = inputDouble("里程: ", 0.0, 9999999.0);
             printf(modifyVehicle(id, v) ? "已修改\n" : "失败\n"); // 输入所有信息并替换v的所有信息（部分校验）并进入函数添加，如果返回false说明失败了
             pauseScreen();

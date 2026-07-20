@@ -46,6 +46,7 @@ struct Vehicle {
     char purchaseDate[MAX_DATE_LEN];
     int status;
     double dailyRate;
+    double deposit;
     double mileage;
     char insurance[MAX_INSURANCE_LEN];
 };
@@ -515,7 +516,7 @@ bool addRentRecord(int vehicleId, int renterId, const char* rentDate, const char
     rec.renterId = renterId;
     strncpy(rec.rentDate, rentDate, MAX_DATE_LEN - 1); // 复制日期字符串
     strncpy(rec.expectedReturnDate, expectDate, MAX_DATE_LEN - 1);
-    rec.deposit = v->dailyRate * 3; // 押金=日租金*3
+    rec.deposit = v->deposit; // 押金取自车辆
     rec.dailyRate = v->dailyRate; // 当前日租金保存快照
     strncpy(rec.vehicleBrand, v->brand, MAX_BRAND_LEN - 1); // 车辆数据复制到记录
     strncpy(rec.vehiclePlate, v->plateNo, MAX_PLATE_LEN - 1);
@@ -535,10 +536,14 @@ bool addRentRecord(int vehicleId, int renterId, const char* rentDate, const char
 }
 bool returnRent(int rentId, const char* returnDate, double& totalFee, double& refund) {
     RentRecord* rec = findRent(rentId); // 找到之前的rent
-    if (!rec || rec->status == RENT_RETURNED) return false; // 不能重读退车
-    int days = calcDateDiff(rec->rentDate, returnDate); // 计算日期
-    if (days < 1) days = 1; // 不足一天强制1
-    totalFee = days * rec->dailyRate; // 总金额=天数*租金（从快照取）
+    if (!rec || rec->status == RENT_RETURNED) return false; // 不能重复退车
+    int actualDays = calcDateDiff(rec->rentDate, returnDate); // 实际租用天数
+    if (actualDays < 1) actualDays = 1;
+    int expectedDays = calcDateDiff(rec->rentDate, rec->expectedReturnDate); // 预计天数
+    if (expectedDays < 1) expectedDays = 1;
+    int normalDays = actualDays < expectedDays ? actualDays : expectedDays; // 预期内天数
+    int overdueDays = actualDays > expectedDays ? actualDays - expectedDays : 0; // 超期天数
+    totalFee = normalDays * rec->dailyRate + overdueDays * rec->dailyRate * 2; // 正常1x，超期2x
     refund = rec->deposit - totalFee; // 退款=押金-费用
     if (refund < 0) refund = 0; // 退款负数就没有了
     strncpy(rec->actualReturnDate, returnDate, MAX_DATE_LEN - 1);
@@ -582,13 +587,13 @@ void printReturnReceipt(const RentRecord& r, int days, double total, double refu
 }
 // 数据：格式化输出
 void printVehicleHeader() {
-    printf("%-4s %-10s %-10s %-10s %-8s %-12s %-6s %-8s %-10s\n",
-           "ID", "车牌", "品牌", "类型", "颜色", "购车日期", "状态", "日租金", "里程");
+    printf("%-4s %-10s %-10s %-10s %-8s %-12s %-6s %-8s %-10s %-10s\n",
+           "ID", "车牌", "品牌", "类型", "颜色", "购车日期", "状态", "日租金", "押金", "里程");
 }
 void printVehicleRow(const Vehicle& v) {
-    printf("%-4d %-10s %-10s %-10s %-8s %-12s %-6s %-8.2f %-10.1f\n",
+    printf("%-4d %-10s %-10s %-10s %-8s %-12s %-6s %-8.2f %-10.2f %-10.1f\n",
            v.id, v.plateNo, v.brand, v.type, v.color, v.purchaseDate,
-           vehicleStatusStr(v.status), v.dailyRate, v.mileage);
+           vehicleStatusStr(v.status), v.dailyRate, v.deposit, v.mileage);
 }
 void printRenterHeader() {
     printf("%-4s %-10s %-4s %-2s %-12s %-16s %-16s %-4s %-4s\n",
@@ -659,14 +664,15 @@ double totalRevenue() {
 }
 // *按品牌/类型/颜色分组计数
 int countVehiclesByBrand(char labels[][32], int values[], int max) {
-    int n = 0;
+    // 传入类型名称、每个类型数量、最多存储max类
+    int n = 0; // 已记录的颜色数量
     VehicleNode* cur = vehicleHead;
     while (cur) {
-        int found = -1;
-        for (int i = 0; i < n; i++) { if (strcmp(labels[i], cur->data.brand) == 0) { found = i; break; } }
-        if (found >= 0) values[found]++;
-        else if (n < max) { strncpy(labels[n], cur->data.brand, 31); values[n] = 1; n++; }
-        cur = cur->next;
+        int found = -1; // 标记为不在类中
+        for (int i = 0; i < n; i++) { if (strcmp(labels[i], cur->data.brand) == 0) { found = i; break; } } // 在已知标签中搜索并记录
+        if (found >= 0) values[found]++; // 分组计数+1
+        else if (n < max) { strncpy(labels[n], cur->data.brand, 31); values[n] = 1; n++; } // 新分组，复制类型名，新类型初始化1，计数+1
+        cur = cur->next; // 遍历
     }
     return n;
 }
@@ -677,7 +683,7 @@ int countVehiclesByType(char labels[][32], int values[], int max) {
         int found = -1;
         for (int i = 0; i < n; i++) { if (strcmp(labels[i], cur->data.type) == 0) { found = i; break; } }
         if (found >= 0) values[found]++;
-        else if (n < max) { strncpy(labels[n], cur->data.type, 31); values[n] = 1; n++; }
+        else if (n < max) { strncpy(labels[n], cur->data.type, 31); values[n] = 1; n++; } // 比较type
         cur = cur->next;
     }
     return n;
@@ -689,45 +695,44 @@ int countVehiclesByColor(char labels[][32], int values[], int max) {
         int found = -1;
         for (int i = 0; i < n; i++) { if (strcmp(labels[i], cur->data.color) == 0) { found = i; break; } }
         if (found >= 0) values[found]++;
-        else if (n < max) { strncpy(labels[n], cur->data.color, 31); values[n] = 1; n++; }
+        else if (n < max) { strncpy(labels[n], cur->data.color, 31); values[n] = 1; n++; } // 比较colot
         cur = cur->next;
     }
     return n;
 }
-int countRentersByGender(int values[2]) {
-    values[0] = values[1] = 0;
+// 统计用户按性别/驾龄/租车记录数分组计数
+void countRentersByGender(int values[2]) {
+    values[0] = values[1] = 0; // 0M1F，清空
     RenterNode* cur = renterHead;
-    while (cur) { if (cur->data.gender == 'M') values[0]++; else values[1]++; cur = cur->next; }
-    return 2;
+    while (cur) { if (cur->data.gender == 'M') values[0]++; else values[1]++; cur = cur->next; } // 遍历，M 0++，F 1++
 }
-// *统计用户按驾龄分段
 void countRentersByDrivingYears(int values[3]) {
-    values[0] = values[1] = values[2] = 0;
+    values[0] = values[1] = values[2] = 0; // 0 3-，1 4-10，2 11+
     RenterNode* cur = renterHead;
     while (cur) {
         int y = cur->data.drivingYears;
         if (y <= 3) values[0]++; else if (y <= 10) values[1]++; else values[2]++;
-        cur = cur->next;
+        cur = cur->next; // 遍历
     }
 }
-// *按月统计租车记录数
 void countRentsByMonth(int values[12]) {
-    for (int i = 0; i < 12; i++) values[i] = 0;
+    for (int i = 0; i < 12; i++) values[i] = 0; // 十二个月份
     RentNode* cur = rentHead;
     while (cur) {
-        int m = static_cast<int>(strtol(cur->data.rentDate + 5, nullptr, 10));
-        if (m >= 1 && m <= 12) values[m - 1]++;
+        int m = static_cast<int>(strtol(cur->data.rentDate + 5, nullptr, 10)); // rentData+5是月份，strtol提取月份转化为int
+        if (m >= 1 && m <= 12) values[m - 1]++; // 遍历对应计数
         cur = cur->next;
     }
 }
-// *柱状图
+// 柱状图
 void drawBarChart(char labels[][32], int values[], int n) {
+    // 传入类别名称，每个类有多少值，有多少类
     int mx = 0;
-    for (int i = 0; i < n; i++) if (values[i] > mx) mx = values[i];
+    for (int i = 0; i < n; i++) if (values[i] > mx) mx = values[i]; // 找最大值尺标
     for (int i = 0; i < n; i++) {
-        printf("  %-10s [%3d] ", labels[i], values[i]);
-        int bar = mx > 0 ? values[i] * 30 / mx : 0;
-        for (int j = 0; j < bar; j++) printf("#");
+        printf("  %-10s [%3d] ", labels[i], values[i]); // 打标签数值
+        int bar = mx > 0 ? values[i] * 30 / mx : 0; // 当前数值/最大值*30
+        for (int j = 0; j < bar; j++) printf("#"); // #画图
         printf("\n");
     }
 }
@@ -735,34 +740,34 @@ void printStatistics() {
     printf("车辆总数: %d  可租: %d  已租: %d\n", vehicleCount, countAvailableVehicles(), countRentedVehicles());
     printf("用户总数: %d  租车记录: %d  进行中: %d  总收入: %.2f\n", renterCount, rentCount, countActiveRents(), totalRevenue());
 }
-// *导出报表
+// 导出报表
 void exportReport() {
     char name[64];
-    getNowDateTime(name, sizeof(name));
-    for (int i = 0; name[i]; i++) if (name[i] == ' ' || name[i] == ':') name[i] = '_';
+    getNowDateTime(name, sizeof(name)); // 获取当前时间
+    for (int i = 0; name[i]; i++) if (name[i] == ' ' || name[i] == ':') name[i] = '_'; // 替换所有空格和冒号为下划线
     char fileName[96];
-    snprintf(fileName, sizeof(fileName), "report_%s.txt", name);
-    FILE* fp = fopen(fileName, "w");
+    snprintf(fileName, sizeof(fileName), "report_%s.txt", name); // 最终文件名称是report与下划线版本时间链接的txt
+    FILE* fp = fopen(fileName, "w"); // 写入模式打开刚刚的report
     if (!fp) return;
     fprintf(fp, "车辆信息\n");
     VehicleNode* vc = vehicleHead;
     while (vc) {
-        fprintf(fp, "%d %s %s %s %s %.2f %s\n", vc->data.id, vc->data.plateNo, vc->data.brand,
-                vc->data.type, vc->data.color, vc->data.dailyRate, vehicleStatusStr(vc->data.status));
-        vc = vc->next;
+        fprintf(fp, "%d %s %s %s %s %.2f %.2f %s\n", vc->data.id, vc->data.plateNo, vc->data.brand,
+                vc->data.type, vc->data.color, vc->data.dailyRate, vc->data.deposit, vehicleStatusStr(vc->data.status));
+        vc = vc->next; // 遍历打印车辆信息
     }
     fprintf(fp, "\n用户信息\n");
     RenterNode* rc = renterHead;
     while (rc) {
         fprintf(fp, "%d %s %s %s\n", rc->data.id, rc->data.name, rc->data.licenseNo, rc->data.phone);
-        rc = rc->next;
+        rc = rc->next; // 同上
     }
     fprintf(fp, "\n租车记录\n");
     RentNode* rtc = rentHead;
     while (rtc) {
         fprintf(fp, "%d %d %d %s %s %.2f %s\n", rtc->data.id, rtc->data.vehicleId, rtc->data.renterId,
                 rtc->data.rentDate, rtc->data.expectedReturnDate, rtc->data.totalFee, rentStatusStr(rtc->data.status));
-        rtc = rtc->next;
+        rtc = rtc->next; // 同上
     }
     fclose(fp);
 }
