@@ -2,7 +2,7 @@
  * 汽车租赁管理系统
  * 文件: menu5_query.cpp
  * 功能: 信息查询子菜单
- * 日期: 2026-07
+ * 日期: 2026-07-16
  */
 void menu5Query() {
     while (true) {
@@ -74,7 +74,7 @@ void menu5Query() {
             if (sc == 1) {
                 int st = inputInt("状态(0租用中/1已归还): ", 0, 1);
                 RentNode* cur = rentHead;
-                while (cur) { if (cur->data.status == st) printRentRow(cur->data); cur = cur->next; } // 与上同理，链表不同而已
+                while (cur) { if (cur->data.status == st) printRentRow(cur->data); cur = cur->next; } // 与上同理
             } else {
                 char d1[MAX_DATE_LEN], d2[MAX_DATE_LEN]; // 定义并输入两个日期
                 inputLine("起始日期(YYYY-MM-DD): ", d1, MAX_DATE_LEN);

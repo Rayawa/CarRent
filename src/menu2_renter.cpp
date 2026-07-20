@@ -2,7 +2,7 @@
  * 汽车租赁管理系统
  * 文件: menu2_renter.cpp
  * 功能: 租车用户信息管理子菜单
- * 日期: 2026-07
+ * 日期: 2026-07-16
  */
 void menu2Renter() {
     while (true) {

@@ -2,7 +2,7 @@
  * 汽车租赁管理系统
  * 文件: menu1_vehicle.cpp
  * 功能: 车辆信息管理子菜单
- * 日期: 2026-07
+ * 日期: 2026-07-16
  */
 void menu1Vehicle() {
     while (true) {

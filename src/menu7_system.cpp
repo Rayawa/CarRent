@@ -2,7 +2,7 @@
  * 汽车租赁管理系统
  * 文件: menu7_system.cpp
  * 功能: 系统设置子菜单
- * 日期: 2026-07
+ * 日期: 2026-07-16
  */
 void menu7System() {
     while (true) {

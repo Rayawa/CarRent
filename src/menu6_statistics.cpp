@@ -2,7 +2,7 @@
  * 汽车租赁管理系统
  * 文件: menu6_statistics.cpp
  * 功能: 统计汇总子菜单
- * 日期: 2026-07
+ * 日期: 2026-07-16
  */
 void menu6Statistics() {
     while (true) {

@@ -6,7 +6,8 @@
 |-------|--------------------------------------|
 | 文件名   | `car_rent.cpp`                       |
 | 全路径   | `src/car_rent.cpp`                   |
-| 代码行数  | 816 行                                |
+| 代码行数  | 1035 行（car_rent.cpp），项目总行数 1441 行                                   |
+| 注释占比  | 22.2%（>10% 符合规范要求）                                                  |
 | 编写语言  | C++11（使用 `constexpr`、`nullptr`）      |
 | 依赖头文件 | `cstdio`、`cstdlib`、`cstring`、`ctime` |
 | 架构模式  | 单文件聚合式设计，通过 `#include` 拼接子菜单模块       |
@@ -132,18 +133,19 @@
 #### 1.4.1 Vehicle 结构体
 
 ```cpp
-40→ struct Vehicle {
-41→     int id;
-42→     char plateNo[MAX_PLATE_LEN];
-43→     char brand[MAX_BRAND_LEN];
-44→     char type[MAX_TYPE_LEN];
-45→     char color[MAX_COLOR_LEN];
-46→     char purchaseDate[MAX_DATE_LEN];
-47→     int status;
-48→     double dailyRate;
-49→     double mileage;
-50→     char insurance[MAX_INSURANCE_LEN];
-51→ };
+41→ struct Vehicle {
+42→     int id;
+43→     char plateNo[MAX_PLATE_LEN];
+44→     char brand[MAX_BRAND_LEN];
+45→     char type[MAX_TYPE_LEN];
+46→     char color[MAX_COLOR_LEN];
+47→     char purchaseDate[MAX_DATE_LEN];
+48→     int status;
+49→     double dailyRate;
+50→     double deposit;
+51→     double mileage;
+52→     char insurance[MAX_INSURANCE_LEN];
+53→ };
 ```
 
 | 字段             | 类型         | 长度(字节) | 含义                                            |
@@ -156,6 +158,7 @@
 | `purchaseDate` | `char[16]` | 16     | 购车日期，格式 `YYYY-MM-DD`                          |
 | `status`       | `int`      | 4      | 车辆状态，对应 `VehicleStatus` 枚举                    |
 | `dailyRate`    | `double`   | 8      | 日租金（元/天）                                      |
+| `deposit`      | `double`   | 8      | 押金金额（元），车辆预设，独立于日租金                          |
 | `mileage`      | `double`   | 8      | 里程数（公里）                                       |
 | `insurance`    | `char[64]` | 64     | 保险信息描述                                        |
 
@@ -216,9 +219,9 @@
 | `rentDate`           | `char[16]` | 租车起始日期                               |
 | `expectedReturnDate` | `char[16]` | 预计归还日期                               |
 | `actualReturnDate`   | `char[16]` | 实际归还日期（退车时填入）                        |
-| `deposit`            | `double`   | 押金金额（默认 = `dailyRate × 3`）           |
+| `deposit`            | `double`   | 车辆预设押金金额（从 Vehicle 复制，独立于日租金）        |
 | `dailyRate`          | `double`   | 签约时的日租金快照（从 Vehicle 复制，防止后续改价影响历史记录） |
-| `totalFee`           | `double`   | 总费用（退车结算时计算 = 天数 × 日租金）              |
+| `totalFee`           | `double`   | 总费用（退车结算时计算：正常天数 × 日租金 + 超期天数 × 日租金 × 2） |
 | `status`             | `int`      | 订单状态，对应 `RentStatus` 枚举              |
 | `vehicleBrand`       | `char[32]` | 车辆品牌快照（冗余存储，用于票据打印）                  |
 | `vehiclePlate`       | `char[16]` | 车牌号快照（冗余存储）                          |
@@ -1293,7 +1296,7 @@ fopen(文件名, "rb")
 514→     rec.renterId = renterId;                                            // 门 8
 515→     strncpy(rec.rentDate, rentDate, MAX_DATE_LEN - 1);                 // 门 9
 516→     strncpy(rec.expectedReturnDate, expectDate, MAX_DATE_LEN - 1);     // 门 10
-517→     rec.deposit = v->dailyRate * 3;                                     // 门 11
+517→     rec.deposit = v->deposit;                                            // 门 11
 518→     rec.dailyRate = v->dailyRate;                                       // 门 12
 519→     strncpy(rec.vehicleBrand, v->brand, MAX_BRAND_LEN - 1);            // 门 13
 520→     strncpy(rec.vehiclePlate, v->plateNo, MAX_PLATE_LEN - 1);          // 门 14
@@ -1326,7 +1329,7 @@ fopen(文件名, "rb")
 | 6     | `rec.id = nextRentId()`                         | 遍历 `rentHead` 找最大 ID + 1                                                         |
 | 7–8   | `rec.vehicleId` / `rec.renterId`                | 记录关联 ID                                                                          |
 | 9–10  | `strncpy(..., MAX_DATE_LEN - 1)`                | 复制日期字符串（留 `\0` 空间）                                                               |
-| 11    | `rec.deposit = v->dailyRate * 3`                | **业务规则**：押金 = 日租金的 3 倍。这是一个硬编码的业务参数                                              |
+| 11    | `rec.deposit = v->deposit`                     | **业务规则**：押金直接取自车辆预设押金金额，保持业务灵活性——不同车型可预设不同押金                        |
 | 12    | `rec.dailyRate = v->dailyRate`                  | 快照日租金——即使后续车辆日租金被修改，此记录中的费率不变                                                    |
 | 13–14 | `strncpy(..., v->brand)` 等                      | **数据冗余**：将车辆品牌和车牌号复制到租车记录中。这是一种反范式设计，优点是查询时无需 JOIN，缺点是修改车辆时此处的冗余数据不会同步更新         |
 | 15–16 | `strncpy(..., r->name)` 等                       | 同理复制用户姓名和驾照号                                                                     |
@@ -1359,56 +1362,62 @@ fopen(文件名, "rb")
 
 ```cpp
 535→ bool returnRent(int rentId, const char* returnDate, double& totalFee, double& refund) {
-536→     RentRecord* rec = findRent(rentId);                          // 1
-537→     if (!rec || rec->status == RENT_RETURNED) return false;      // 2
-538→     int days = calcDateDiff(rec->rentDate, returnDate);          // 3
-539→     if (days < 1) days = 1;                                      // 4
-540→     totalFee = days * rec->dailyRate;                             // 5
-541→     refund = rec->deposit - totalFee;                             // 6
-542→     if (refund < 0) refund = 0;                                   // 7
-543→     strncpy(rec->actualReturnDate, returnDate, MAX_DATE_LEN - 1); // 8
-544→     rec->totalFee = totalFee;                                     // 9
-545→     rec->status = RENT_RETURNED;                                  // 10
-546→     Vehicle* v = findVehicle(rec->vehicleId);                     // 11
-547→     if (v) v->status = STATUS_AVAILABLE;                          // 12
-548→     saveAllData();                                                // 13
-549→     logAction("办理退车");                                       // 14
-550→     return true;                                                  // 15
-551→ }
+536→     RentRecord* rec = findRent(rentId);                                // 1
+537→     if (!rec || rec->status == RENT_RETURNED) return false;            // 2
+538→     int actualDays = calcDateDiff(rec->rentDate, returnDate);          // 3
+539→     if (actualDays < 1) actualDays = 1;                                // 4
+540→     int expectedDays = calcDateDiff(rec->rentDate, rec->expectedReturnDate); // 5
+541→     if (expectedDays < 1) expectedDays = 1;                            // 6
+542→     int normalDays = actualDays < expectedDays ? actualDays : expectedDays; // 7
+543→     int overdueDays = actualDays > expectedDays ? actualDays - expectedDays : 0; // 8
+544→     totalFee = normalDays * rec->dailyRate + overdueDays * rec->dailyRate * 2; // 9
+545→     refund = rec->deposit;                                             // 10
+546→     strncpy(rec->actualReturnDate, returnDate, MAX_DATE_LEN - 1);      // 11
+547→     rec->totalFee = totalFee;                                          // 12
+548→     rec->status = RENT_RETURNED;                                       // 13
+549→     Vehicle* v = findVehicle(rec->vehicleId);                          // 14
+550→     if (v) v->status = STATUS_AVAILABLE;                               // 15
+551→     saveAllData();                                                     // 16
+552→     logAction("办理退车");                                            // 17
+553→     return true;                                                       // 18
+554→ }
 ```
 
-**十五步退车管线**：
+**十八步退车管线**：
 
-| 步骤 | 操作                                        | 分析                                                            |
-|----|-------------------------------------------|---------------------------------------------------------------|
-| 1  | `findRent(rentId)`                        | O(n) 查找租车记录                                                   |
-| 2  | `!rec \|\| rec->status == RENT_RETURNED`  | 双重检查：记录存在 AND 状态为"租用中"（未退还）。已退还的记录再次退还将被拒绝                    |
-| 3  | `calcDateDiff(rec->rentDate, returnDate)` | 计算租用天数。内部调用 `dateToDays`，将两个日期分别转换为儒略日计数再相减。包含闰年处理            |
-| 4  | `if (days < 1) days = 1`                  | **最小计费天数 = 1**：即使当天租当天还，也按 1 天计费                              |
-| 5  | `totalFee = days * rec->dailyRate`        | 总费用 = 天数 x 日租金。使用引用参数传出                                       |
-| 6  | `refund = rec->deposit - totalFee`        | 退款 = 押金 - 总费用。使用引用参数传出                                        |
-| 7  | `if (refund < 0) refund = 0`              | **退款下界 = 0**：如果费用超过押金，不要求用户补差额（仅退款归零，不追索）                     |
-| 8  | `strncpy(rec->actualReturnDate, ...)`     | 记录实际归还日期                                                      |
-| 9  | `rec->totalFee = totalFee`                | 保存总费用到记录                                                      |
-| 10 | `rec->status = RENT_RETURNED`             | **状态转换**：`RENT_ACTIVE (0)` → `RENT_RETURNED (1)`              |
-| 11 | `findVehicle(rec->vehicleId)`             | 通过记录中的 `vehicleId` 反向查找车辆                                     |
-| 12 | `if (v) v->status = STATUS_AVAILABLE`     | **状态恢复**：车辆从"已租"恢复为"可租"。`if (v)` 防护——如果车辆已被删除，则跳过状态更新但仍继续退车流程 |
-| 13 | `saveAllData()`                           | 持久化全部数据                                                       |
-| 14 | `logAction("办理退车")`                       | 日志                                                            |
-| 15 | `return true`                             | 成功                                                            |
+| 步骤 | 操作                                                    | 分析                                                                       |
+|----|-------------------------------------------------------|--------------------------------------------------------------------------|
+| 1  | `findRent(rentId)`                                    | O(n) 查找租车记录                                                              |
+| 2  | `!rec \|\| rec->status == RENT_RETURNED`              | 双重检查：记录存在 AND 状态为"租用中"。已退还的记录再次退还将被拒绝                                    |
+| 3  | `actualDays = calcDateDiff(rentDate, returnDate)`     | 计算实际租用天数。包含闰年处理                                                          |
+| 4  | `if (actualDays < 1) actualDays = 1`                  | **最小计费天数 = 1**：即使当天租当天还，也按 1 天计费                                         |
+| 5  | `expectedDays = calcDateDiff(rentDate, expectedDate)` | 计算预计租用天数                                                                 |
+| 6  | `if (expectedDays < 1) expectedDays = 1`              | 同上                                                                       |
+| 7  | `normalDays = min(actualDays, expectedDays)`          | 正常天数 = 实际与预计的较小者                                                          |
+| 8  | `overdueDays = actualDays - expectedDays`             | 超期天数（若提前归还则为 0）                                                          |
+| 9  | `totalFee = normalDays * rate + overdueDays * rate * 2` | **分段计费**：正常天数 × 1 倍日租金 + 超期天数 × 2 倍日租金（含惩罚性费率）                           |
+| 10 | `refund = rec->deposit`                               | **退款 = 全额押金**。押金与租车费用分离，退车时退还全部押金，租车费用另行结算                              |
+| 11 | `strncpy(rec->actualReturnDate, ...)`                 | 记录实际归还日期                                                                 |
+| 12 | `rec->totalFee = totalFee`                            | 保存总费用到记录                                                                 |
+| 13 | `rec->status = RENT_RETURNED`                         | **状态转换**：`RENT_ACTIVE (0)` → `RENT_RETURNED (1)`                         |
+| 14 | `findVehicle(rec->vehicleId)`                         | 通过记录中的 `vehicleId` 反向查找车辆                                                |
+| 15 | `if (v) v->status = STATUS_AVAILABLE`                 | **状态恢复**：车辆从"已租"恢复为"可租"。`if (v)` 防护——如果车辆已被删除，则跳过状态更新但仍继续退车流程            |
+| 16 | `saveAllData()`                                       | 持久化全部数据                                                                  |
+| 17 | `logAction("办理退车")`                                   | 日志                                                                       |
+| 18 | `return true`                                         | 成功                                                                       |
 
 **费用计算示例**：
 
-| 日租金 | 租用天数 | 总费用  | 押金（日租金 x 3） | 退款              |
-|-----|------|------|-------------|-----------------|
-| 200 | 5    | 1000 | 600         | 0（费用 > 押金，退款归零） |
-| 200 | 3    | 600  | 600         | 0               |
-| 200 | 2    | 400  | 600         | 200             |
-| 200 | 1    | 200  | 600         | 400             |
+| 日租金 | 预计天数 | 实际天数 | 正常天数 | 超期天数 | 总费用 | 押金 | 退款 |
+|-----|------|------|------|------|-----|----|----|
+| 200 | 5    | 5    | 5    | 0    | 1000 | 600 | 600 |
+| 200 | 5    | 3    | 3    | 0    | 600  | 600 | 600 |
+| 200 | 5    | 8    | 5    | 3    | 2200 | 600 | 600 |
+| 200 | 3    | 1    | 1    | 0    | 200  | 600 | 600 |
 
-**第 11–12 行的防御性设计**：`if (v) v->status = STATUS_AVAILABLE` 中的空指针检查是重要的防御措施。如果车辆在租用期间被 `deleteVehicle` 删除，`findVehicle` 将返回 `nullptr`，但退车操作不应因此失败——费用仍需计算，记录仍需标记为已归还。这种设计体现了"容错优先"的哲学。
+**第 14–15 行的防御性设计**：`if (v) v->status = STATUS_AVAILABLE` 中的空指针检查是重要的防御措施。如果车辆在租用期间被 `deleteVehicle` 删除，`findVehicle` 将返回 `nullptr`，但退车操作不应因此失败——费用仍需计算，记录仍需标记为已归还。
 
-**数学不等式**：`refund = max(0, deposit - max(1, days) * dailyRate)`。由于 `deposit = dailyRate * 3`，当 `days >= 3` 时 `refund = 0`。因此用户租用 3 天或以上就不会有退款，但也不会被追索差额。
+**计费规则总结**：`totalFee = min(实际, 预计) × 日租金 + max(实际 − 预计, 0) × 日租金 × 2`。超期天数按双倍日租金惩罚计费，以鼓励按时归还。退款固定等于押金（与原存入金额一致），与费用分离。
 
 ---
 
@@ -2237,7 +2246,7 @@ mainMenu()
 
 ### 16.7 整体评价
 
-`car_rent.cpp` 是一个功能完整的汽车租赁管理系统核心实现，在 816 行代码中覆盖了：
+`car_rent.cpp` 是一个功能完整的汽车租赁管理系统核心实现，在 1035 行代码中覆盖了（含子模块项目总行数 1441 行）：
 
 - **数据层**：3 种实体（Vehicle、Renter、RentRecord）、3 条单向链表、二进制文件持久化
 - **业务层**：车辆/用户 CRUD、租车/退车交易、关联数据维护、状态机管理
@@ -2250,4 +2259,10 @@ mainMenu()
 
 ---
 
-*分析完成。本文档覆盖了 `car_rent.cpp`（816 行）的全部 15 个模块分区 + 1 个综合总结章节，以逐行逐变量逐语句的粒度进行了技术剖析。*
+*分析完成。本文档覆盖了 `car_rent.cpp`（1035 行，项目总行数 1441 行）的全部 15 个模块分区 + 1 个综合总结章节，以逐行逐变量逐语句的粒度进行了技术剖析。*
+
+> **2026-07-20 更新**: 已完成以下改进：
+> - 全部函数添加 `/* 功能/入参/返回/异常 */` 文档注释，注释率从 8.1% 提升至 22.2%
+> - `showBanner()` 从 `runApp()` 移入 `mainMenu()` 循环，实现实时日期时间刷新
+> - `printAllVehicles/Renters/Rents` 添加分页功能（每 20 行暂停）
+> - 代码行数从 816 增长至 1035 行（含新增注释和功能）
